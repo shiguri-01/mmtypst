@@ -1,5 +1,5 @@
 {
-  "name": "mmtypst",
+  "name": "mmtypst-monorepo",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -16,6 +16,11 @@
     "packageManager": {
       "name": "pnpm",
       "version": "12.3.4",
+      "onFail": "download"
+    },
+    "runtime": {
+      "name": "node",
+      "version": "24.21.0",
       "onFail": "download"
     }
   },

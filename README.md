@@ -1,28 +1,34 @@
-# Vite+ Monorepo Starter
+# mmtypst (MathML + Typst)
 
-A starter for creating a Vite+ monorepo.
+A lightweight, zero-dependency library to parse Typst math expressions and generate native MathML for displaying formulas on websites and applications.
+
+Works seamlessly in both **browser** and **server-side** environments (Node.js, Bun, Deno, Edge runtimes, SSR, SSG).
+
+## Monorepo Structure
+
+- [`packages/mmtypst`](packages/mmtypst): Core library for parsing Typst math syntax and rendering MathML.
 
 ## Development
 
-- Check everything is ready:
+- Verify lint, formatting, tests, and build:
 
 ```bash
 vp run ready
 ```
 
-- Run the tests:
+- Run test suite:
 
 ```bash
 vp run -r test
 ```
 
-- Build the monorepo:
+- Build packages:
 
 ```bash
 vp run -r build
 ```
 
-- Run the development server:
+- Start playground dev server:
 
 ```bash
 vp run dev

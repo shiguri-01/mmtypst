@@ -1,7 +1,7 @@
 {
-  "name": "utils",
-  "version": "0.0.0",
-  "description": "A starter for creating a TypeScript package.",
+  "name": "mmtypst",
+  "version": "0.1.0",
+  "description": "Parse Typst math expressions and output clean MathML for browsers and servers.",
   "homepage": "https://github.com/author/library#readme",
   "bugs": {
     "url": "https://github.com/author/library/issues"
@@ -16,6 +16,7 @@
     "dist"
   ],
   "type": "module",
+  "types": "./dist/index.d.mts",
   "exports": {
     ".": "./dist/index.mjs",
     "./package.json": "./package.json"
@@ -26,7 +27,7 @@
   "scripts": {
     "build": "vp pack",
     "dev": "vp pack --watch",
-    "test": "vp test",
+    "test": "vp test --run",
     "check": "vp check",
     "prepublishOnly": "vp run build"
   },
