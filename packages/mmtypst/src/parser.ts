@@ -1,13 +1,7 @@
-import {
-  getBinaryPrecedence,
-  isBinaryOperator,
-  MATH_FUNCTIONS,
-  Precedence,
-  SPACES,
-  SYMBOLS,
-} from "./symbols.ts";
+import { MATH_FUNCTIONS, SPACES, SYMBOLS } from "./symbols.ts";
 import type {
   ASTNode,
+  AttachNode,
   CaseBranch,
   ParseError,
   ParseResult,
@@ -61,13 +55,6 @@ function opening(token: Token): boolean {
   return ["LPAREN", "OPEN_DELIM", "LBRACKET", "LBRACE"].includes(token.type);
 }
 
-function boundary(token: Token): boolean {
-  return (
-    closing(token) ||
-    ["EOF", "COMMA", "SEMICOLON", "AMPERSAND", "LINEBREAK", "NEWLINE"].includes(token.type)
-  );
-}
-
 function compactRow(children: readonly ASTNode[]): ASTNode {
   return children.length === 1
     ? children[0]
@@ -85,11 +72,53 @@ function operator(token: Token): ASTNode {
 export function parsePrimary(state: ParseState): ParseResult<ASTNode> {
   const token = peek(state);
   const after = next(state);
-  if (boundary(token)) {
+  if (["EOF", "CARET", "UNDERSCORE", "SLASH"].includes(token.type)) {
     return failure(state, "Expected expression");
   }
   if (opening(token)) {
     return parseGroup(state);
+  }
+  if (token.type === "AMPERSAND" || token.type === "LINEBREAK") {
+    return {
+      ok: true,
+      value: {
+        type: "LayoutMarker",
+        kind: token.type === "AMPERSAND" ? "alignment" : "linebreak",
+        start: token.start,
+        end: token.end,
+      },
+      state: after,
+    };
+  }
+  if (token.type === "ROOT") {
+    const radicand = parseExpression(after, ATTACH_PREC);
+    if (!radicand.ok) return radicand;
+    const index = token.value === "∛" ? "3" : token.value === "∜" ? "4" : undefined;
+    return {
+      ok: true,
+      value: {
+        type: "FunctionCall",
+        name: index ? "root" : "sqrt",
+        args: index
+          ? [{ type: "Number", value: index }, unparen(radicand.value)]
+          : [unparen(radicand.value)],
+        start: token.start,
+        end: radicand.value.end,
+      },
+      state: radicand.state,
+    };
+  }
+  if (token.type === "PRIMES") {
+    return {
+      ok: true,
+      value: {
+        type: "Operator",
+        operator: "′".repeat(token.value.length),
+        start: token.start,
+        end: token.end,
+      },
+      state: after,
+    };
   }
   if (token.type === "NUMBER" || token.type === "STRING") {
     return {
@@ -109,11 +138,30 @@ export function parsePrimary(state: ParseState): ParseResult<ASTNode> {
       : operator(token);
     return { ok: true, value, state: after };
   }
+  if (token.type === "ATOM") {
+    return {
+      ok: true,
+      value: {
+        type: "Ident",
+        name: token.value,
+        isUnknown: false,
+        start: token.start,
+        end: token.end,
+      },
+      state: after,
+    };
+  }
   if (token.type === "IDENT") {
     return parseIdentifier(state);
   }
 
-  if (token.type === "OPERATOR" || token.type === "COLON") {
+  if (
+    token.type === "OPERATOR" ||
+    token.type === "COLON" ||
+    closing(token) ||
+    token.type === "COMMA" ||
+    token.type === "SEMICOLON"
+  ) {
     if (token.value === "#") {
       return failure(state, "Embedded Typst code (#) is not supported");
     }
@@ -170,33 +218,6 @@ function parseIdentifier(state: ParseState): ParseResult<ASTNode> {
   };
 }
 
-export function parsePrefix(state: ParseState): ParseResult<ASTNode> {
-  const token = peek(state);
-  if (token.type === "OPERATOR" && ["+", "-", "−"].includes(token.value)) {
-    const after = next(state);
-    if (boundary(peek(after))) {
-      return { ok: true, value: operator(token), state: after };
-    }
-    const operand = parseExpression(after, Precedence.PREFIX);
-    if (!operand.ok) {
-      return operand;
-    }
-    return {
-      ok: true,
-      value: {
-        type: "UnaryOp",
-        operator: token.value,
-        argument: operand.value,
-        position: "prefix",
-        start: token.start,
-        end: operand.value.end,
-      },
-      state: operand.state,
-    };
-  }
-  return parsePrimary(state);
-}
-
 /** A group can have mixed delimiters, or an absent close, in Typst math. */
 export function parseGroup(state: ParseState): ParseResult<ASTNode> {
   const open = peek(state);
@@ -206,25 +227,32 @@ export function parseGroup(state: ParseState): ParseResult<ASTNode> {
   }
   const close = peek(body.state);
   const hasClose = closing(close);
+  if (!hasClose) {
+    return { ok: true, value: compactRow([operator(open), body.value]), state: body.state };
+  }
   return {
     ok: true,
     value: {
       type: "Group",
       open: open.value,
-      close: hasClose ? close.value : "",
+      close: close.value,
       body: body.value,
       isFence: true,
       start: open.start,
-      end: hasClose ? close.end : close.start,
+      end: close.end,
     },
-    state: hasClose ? next(body.state) : body.state,
+    state: next(body.state),
   };
 }
 
 function namedArgument(state: ParseState): boolean {
   const name = peek(state);
   const colon = peek(state, 1);
-  return name.type === "IDENT" && colon.type === "COLON" && name.end === colon.start;
+  return (
+    (name.type === "IDENT" || (name.type === "ATOM" && /^\p{XID_Start}/u.test(name.value))) &&
+    colon.type === "COLON" &&
+    name.end === colon.start
+  );
 }
 
 /** Shared arguments and delimiter-option parsing for all supported calls. */
@@ -251,7 +279,7 @@ export function parseFunctionCall(state: ParseState, name: string): ParseResult<
       }
 
       cursor = next(next(cursor));
-      if (boundary(peek(cursor))) {
+      if (isAtEnd(cursor) || callBoundary(peek(cursor))) {
         return failure(cursor, `Expected value for ${key}`);
       }
       const value = parseContent(cursor, callBoundary);
@@ -355,161 +383,71 @@ function callBoundary(token: Token): boolean {
   return ["COMMA", "SEMICOLON", "RPAREN"].includes(token.type);
 }
 
-/** Repeated identical attachments associate right; the opposite kind chains. */
-function parseAttachment(state: ParseState, base: ASTNode): ParseResult<ASTNode> {
-  const firstKind = peek(state).type;
-  const opposite = firstKind === "CARET" ? "UNDERSCORE" : "CARET";
-  const first = parseScriptOperand(next(state), opposite);
-  if (!first.ok) {
-    return first;
-  }
-  let cursor = first.state;
-  let subscript = firstKind === "UNDERSCORE" ? first.value : undefined;
-  let superscript = firstKind === "CARET" ? first.value : undefined;
-  if (peek(cursor).type === opposite) {
-    const second = parseScriptOperand(next(cursor), firstKind);
-    if (!second.ok) {
-      return second;
-    }
-    if (opposite === "UNDERSCORE") {
-      subscript = second.value;
-    } else {
-      superscript = second.value;
-    }
-    cursor = second.state;
-  }
-  return {
-    ok: true,
-    value: {
-      type: "Attach",
-      base,
-      subscript,
-      superscript,
-      start: base.start,
-      end: peek(cursor, -1).end,
-    },
-    state: cursor,
-  };
-}
-
-function parseScriptOperand(state: ParseState, stop: TokenType): ParseResult<ASTNode> {
-  if (boundary(peek(state))) {
-    return failure(state, "Expected script operand");
-  }
-  // In Typst math, a sign after an attachment is an operator atom, not a
-  // unary expression. Thus `x^-1` is `x^−` followed by `1`.
-  const token = peek(state);
-  const result =
-    token.type === "OPERATOR" && ["+", "-", "−"].includes(token.value)
-      ? parsePrimary(state)
-      : parseExpression(state, Precedence.ATTACH - 1, stop);
-  return result.ok ? { ...result, value: unparen(result.value) } : result;
-}
+// Typst 0.15.1 math_expr_prec / math_op:
+// https://github.com/typst/typst/blob/v0.15.1/crates/typst-syntax/src/parser.rs
+// Arithmetic symbols are atoms. Only these syntactic operators bind atoms;
+// juxtaposition is collected by parseContent, outside the precedence parser.
+const FRAC_PREC = 1;
+const ATTACH_PREC = 2; // Also roots and implicit/explicit function calls.
+const FACTORIAL_PREC = 3;
 
 export function parseExpression(
   state: ParseState,
-  minPrec: number = Precedence.NONE,
-  stopScript?: TokenType,
+  minPrec = 0,
+  stopScripts: readonly TokenType[] = [],
 ): ParseResult<ASTNode> {
-  const first = parsePrefix(state);
-  if (!first.ok) {
-    return first;
-  }
+  const first = parsePrimary(state);
+  if (!first.ok) return first;
   let left = first.value;
   let cursor = first.state;
 
-  // This local builder is owned by this parse invocation, never a caller's AST.
-  let juxtaposed: ASTNode[] | undefined;
-  const append = (right: ASTNode) => {
-    if (!juxtaposed) {
-      juxtaposed = left.type === "Row" ? [...left.children] : [left];
-      left = { type: "Row", children: juxtaposed, start: left.start };
-    }
-    juxtaposed.push(right);
-  };
+  // Alphabetic atoms, strings, escapes and primes group with one directly
+  // following delimiter pair. Numbers, shorthands and completed calls don't.
+  const initial = peek(state);
+  const continuable =
+    ["STRING", "LITERAL", "PRIMES"].includes(initial.type) ||
+    (initial.type === "ATOM" && /^\p{Alphabetic}+$/u.test(initial.value)) ||
+    (initial.type === "IDENT" &&
+      left.type !== "FunctionCall" &&
+      left.type !== "Matrix" &&
+      left.type !== "Cases");
+  if (
+    continuable &&
+    minPrec <= ATTACH_PREC &&
+    opening(peek(cursor)) &&
+    peek(cursor, -1).end === peek(cursor).start
+  ) {
+    const group = parseGroup(cursor);
+    if (!group.ok) return group;
+    left = compactRow([left, group.value]);
+    cursor = group.state;
+  }
 
-  while (!isAtEnd(cursor)) {
+  while (!isAtEnd(cursor) && !stopScripts.includes(peek(cursor).type)) {
     const token = peek(cursor);
-    if (boundary(token) || token.type === stopScript) {
-      break;
-    }
     const adjacent = peek(cursor, -1).end === token.start;
-    if (
-      token.type === "OPERATOR" &&
-      token.value === "'" &&
-      adjacent &&
-      minPrec < Precedence.ATTACH
-    ) {
-      let count = 0;
-      do {
-        count++;
-        cursor = next(cursor);
-      } while (
-        peek(cursor).type === "OPERATOR" &&
-        peek(cursor).value === "'" &&
-        peek(cursor, -1).end === peek(cursor).start
-      );
-      let subscript: ASTNode | undefined;
-      if (peek(cursor).type === "UNDERSCORE" && stopScript !== "UNDERSCORE") {
-        const sub = parseScriptOperand(next(cursor), "CARET");
-        if (!sub.ok) {
-          return sub;
-        }
-        subscript = sub.value;
-        cursor = sub.state;
-      }
-      left = {
-        type: "Attach",
-        base: left,
-        superscript: { type: "Operator", operator: "′".repeat(count) },
-        subscript,
-        start: left.start,
-        end: peek(cursor, -1).end,
-      };
-      juxtaposed = undefined;
+    const isFraction = token.type === "SLASH";
+    const isPrime = token.type === "PRIMES" && adjacent;
+    const isScript = token.type === "CARET" || token.type === "UNDERSCORE";
+    const isFactorial = token.type === "OPERATOR" && token.value === "!" && adjacent;
+    const precedence = isFraction
+      ? FRAC_PREC
+      : isScript || isPrime
+        ? ATTACH_PREC
+        : isFactorial
+          ? FACTORIAL_PREC
+          : -1;
+    if (precedence < minPrec) break;
+    cursor = next(cursor);
+
+    if (isFactorial) {
+      left = compactRow([left, operator(token)]);
       continue;
     }
-    if (
-      token.type === "OPERATOR" &&
-      token.value === "!" &&
-      adjacent &&
-      minPrec < Precedence.POSTFIX
-    ) {
-      left = {
-        type: "UnaryOp",
-        operator: "!",
-        argument: left,
-        position: "postfix",
-        start: left.start,
-        end: token.end,
-      };
-      cursor = next(cursor);
-      juxtaposed = undefined;
-      continue;
-    }
-    if ((token.type === "CARET" || token.type === "UNDERSCORE") && minPrec < Precedence.ATTACH) {
-      const result = parseAttachment(cursor, left);
-      if (!result.ok) {
-        return result;
-      }
-      left = result.value;
-      cursor = result.state;
-      juxtaposed = undefined;
-      continue;
-    }
-    if (token.type === "SLASH" && minPrec < Precedence.FRAC) {
-      if (boundary(peek(next(cursor)))) {
-        return failure(cursor, "Expected denominator after /");
-      }
-      // In Typst math, a sign immediately after `/` is an operator atom, not
-      // a unary expression. This keeps `a/-b/c` as `a/−` followed by `b/c`.
-      const denominator =
-        peek(next(cursor)).type === "OPERATOR" && ["+", "-", "−"].includes(peek(next(cursor)).value)
-          ? parsePrimary(next(cursor))
-          : parseExpression(next(cursor), Precedence.FRAC);
-      if (!denominator.ok) {
-        return denominator;
-      }
+    if (isFraction) {
+      if (isAtEnd(cursor)) return failure(cursor, "Expected denominator after /");
+      const denominator = parseExpression(cursor, precedence + 1);
+      if (!denominator.ok) return denominator;
       left = {
         type: "Fraction",
         numerator: unparen(left),
@@ -518,57 +456,40 @@ export function parseExpression(
         end: denominator.value.end,
       };
       cursor = denominator.state;
-      juxtaposed = undefined;
       continue;
     }
-    const precedence = token.type === "LITERAL" ? Precedence.NONE : getBinaryPrecedence(token);
-    if (precedence > minPrec) {
-      const after = next(cursor);
-      const op =
-        token.type === "IDENT" && Object.hasOwn(SYMBOLS, token.value)
-          ? SYMBOLS[token.value].unicode
-          : token.value;
-      if (boundary(peek(after))) {
-        append({
-          type: "Operator",
-          operator: op,
-          sourceName: token.type === "IDENT" ? token.value : undefined,
-          start: token.start,
-          end: token.end,
-        });
-        cursor = after;
-        break;
-      }
-      const right = parseExpression(after, precedence);
-      if (!right.ok) {
-        return right;
-      }
-      left = {
-        type: "BinaryOp",
-        operator: op,
-        sourceName: token.type === "IDENT" ? token.value : undefined,
-        left,
-        right: right.value,
-        start: left.start,
-        end: right.value.end,
-      };
-      cursor = right.state;
-      juxtaposed = undefined;
-      continue;
+
+    // Equal scripts associate right. Opposite scripts chain at the same
+    // level; after consuming a chain member it no longer stops the RHS.
+    let chain: TokenType[] = ["CARET", "UNDERSCORE"];
+    chain = chain.filter((kind) => kind !== token.type);
+    const scripts: { superscript?: ASTNode; subscript?: ASTNode; primes?: number } = {};
+    if (isPrime) {
+      scripts.primes = token.value.length;
+    } else {
+      const operand = parseExpression(cursor, precedence, chain);
+      if (!operand.ok) return operand;
+      scripts[token.type === "CARET" ? "superscript" : "subscript"] = unparen(operand.value);
+      cursor = operand.state;
     }
-    if (
-      (token.type === "LITERAL" || !isBinaryOperator(token)) &&
-      minPrec < Precedence.IMPLICIT_MUL
-    ) {
-      const right = parseExpression(cursor, Precedence.IMPLICIT_MUL);
-      if (!right.ok) {
-        return right;
+    // A prime may not interrupt the enclosing attachment chain.
+    if (!(isPrime && stopScripts.includes(peek(cursor).type))) {
+      while (chain.includes(peek(cursor).type)) {
+        const kind = peek(cursor).type;
+        chain = chain.filter((item) => item !== kind);
+        const operand = parseExpression(next(cursor), precedence, chain);
+        if (!operand.ok) return operand;
+        scripts[kind === "CARET" ? "superscript" : "subscript"] = unparen(operand.value);
+        cursor = operand.state;
       }
-      append(right.value);
-      cursor = right.state;
-      continue;
     }
-    break;
+    left = {
+      type: "Attach",
+      base: left,
+      ...scripts,
+      start: left.start,
+      end: peek(cursor, -1).end,
+    } satisfies AttachNode;
   }
   return { ok: true, value: left, state: cursor };
 }
@@ -598,23 +519,6 @@ function parseContent(state: ParseState, stop: (token: Token) => boolean): Parse
       cursor = next(cursor);
       continue;
     }
-    if (token.type === "LINEBREAK") {
-      hadLayout = true;
-      flushRow();
-      cursor = next(cursor);
-      continue;
-    }
-    if (token.type === "AMPERSAND") {
-      hadLayout = true;
-      flushCell();
-      cursor = next(cursor);
-      continue;
-    }
-    if (closing(token) || token.type === "COMMA" || token.type === "SEMICOLON") {
-      expressions.push(operator(token));
-      cursor = next(cursor);
-      continue;
-    }
     const expression = parseExpression(cursor);
     if (!expression.ok) {
       return expression;
@@ -622,7 +526,13 @@ function parseContent(state: ParseState, stop: (token: Token) => boolean): Parse
     if (expression.state.pos <= cursor.pos) {
       return failure(cursor, "Parser made no progress");
     }
-    expressions.push(expression.value);
+    if (expression.value.type === "LayoutMarker") {
+      hadLayout = true;
+      if (expression.value.kind === "linebreak") flushRow();
+      else flushCell();
+    } else {
+      expressions.push(expression.value);
+    }
     cursor = expression.state;
   }
   if (!hadLayout) {

@@ -23,6 +23,11 @@ describe("functions conversion", () => {
   });
 
   describe("mathematical functions", () => {
+    test("resolves a named symbol used as a callee", () => {
+      expect(typstToMathML("alpha(x)")).toContain('<mi>α</mi><mo fence="true">(</mo>');
+      expect(typstToMathML("sum(x)")).toContain('<mo>∑</mo><mo fence="true">(</mo>');
+      expect(typstToMathML("toString(x)", { symbols: {} })).toContain("<mi>toString</mi>");
+    });
     test("renders functions in upright font in standalone position", () => {
       expect(typstToMathML("sin x")).toContain('<mi mathvariant="normal">sin</mi>');
       expect(typstToMathML("cos x")).toContain('<mi mathvariant="normal">cos</mi>');

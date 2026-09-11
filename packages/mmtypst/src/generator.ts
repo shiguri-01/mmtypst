@@ -8,6 +8,7 @@ import {
   isFence,
   LIMIT_OPERATORS,
   MATH_FUNCTIONS,
+  SYMBOLS,
 } from "./symbols.ts";
 import type {
   ASTNode,
@@ -97,6 +98,8 @@ export function renderNode(node: ASTNode, ctx: RenderContext): string {
       return renderTable(node, ctx);
     case "Space":
       return renderSpace(node);
+    case "LayoutMarker":
+      return "<mrow/>";
     case "Error":
       return renderError(node.message, ctx);
     default:
@@ -184,7 +187,15 @@ function renderAttach(node: AttachNode, ctx: RenderContext): string {
   const script = (value: ASTNode | undefined) => (value ? renderNode(value, childCtx) : undefined);
   let base = renderNode(node.base, { ...ctx, forceLimits: limits });
   const subscript = script(node.subscript);
-  const superscript = script(node.superscript);
+  let superscript = script(node.superscript);
+  if (node.primes) {
+    const primes = `<mo>${"′".repeat(node.primes)}</mo>`;
+    if (limits) {
+      base = `<msup>${base}${primes}</msup>`;
+    } else {
+      superscript = superscript ? `<mrow>${primes}${superscript}</mrow>` : primes;
+    }
+  }
 
   if (subscript && superscript) {
     const tag = limits ? "munderover" : "msubsup";
@@ -311,7 +322,15 @@ function renderFunctionCall(node: FunctionCallNode, ctx: RenderContext): string 
   // Standard upright math operators: sin(x), cos(x), log(x)
   const innerArgs = args.map((a) => renderNode(a, ctx)).join("<mo>,</mo>");
   const variant = MATH_FUNCTIONS.has(name) ? ' mathvariant="normal"' : "";
-  return `<mrow><mi${variant}>${escapeText(name)}</mi><mo fence="true">(</mo>${innerArgs}<mo fence="true">)</mo></mrow>`;
+  const replacement =
+    ctx.options.symbols && Object.hasOwn(ctx.options.symbols, name)
+      ? ctx.options.symbols[name]
+      : undefined;
+  const symbol = SYMBOLS[name];
+  const callee = replacement ?? symbol?.unicode ?? name;
+  const tag =
+    symbol && ["op", "largeop", "rel", "fence", "punct"].includes(symbol.type) ? "mo" : "mi";
+  return `<mrow><${tag}${variant}>${escapeText(callee)}</${tag}><mo fence="true">(</mo>${innerArgs}<mo fence="true">)</mo></mrow>`;
 }
 
 function renderRoot(node: FunctionCallNode, ctx: RenderContext): string {

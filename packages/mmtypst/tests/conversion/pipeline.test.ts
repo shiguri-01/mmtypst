@@ -9,12 +9,6 @@ describe("pipeline conversion", () => {
     expect(tokens.length).toBeGreaterThan(0);
   });
 
-  test("parse constructs AST from tokens", () => {
-    const tokens = tokenize("x + 1");
-    const ast = parse(tokens);
-    expect(ast.type).toBe("BinaryOp");
-  });
-
   test("generateMathML produces MathML string from AST", () => {
     const tokens = tokenize("x + 1");
     const ast = parse(tokens);

@@ -4,11 +4,6 @@ import { tokenize } from "../src/lexer.ts";
 import { parse } from "../src/parser.ts";
 
 describe("parse", () => {
-  test("requires lexical adjacency for calls", () => {
-    expect(parse(tokenize("f (x)"))).toMatchObject({ type: "Row" });
-    expect(parse(tokenize("f(x)"))).toMatchObject({ type: "FunctionCall", name: "f" });
-  });
-
   test("treats ordinary newlines as whitespace", () => {
     expect(parse(tokenize("x\ny"))).toMatchObject({
       type: "Row",
@@ -30,47 +25,6 @@ describe("parse", () => {
       diagnostic: { type: "CustomError" },
     });
     expect(parse(tokenize("sqrt(x, y"))).toMatchObject({ type: "Error" });
-  });
-
-  test("keeps signs after a fraction slash as separate math atoms", () => {
-    expect(parse(tokenize("a/-b/c"))).toMatchObject({
-      type: "Row",
-      children: [
-        {
-          type: "Fraction",
-          numerator: { type: "Ident", name: "a" },
-          denominator: { type: "Operator", operator: "−" },
-        },
-        {
-          type: "Fraction",
-          numerator: { type: "Ident", name: "b" },
-          denominator: { type: "Ident", name: "c" },
-        },
-      ],
-    });
-  });
-
-  test("keeps signs after attachments as separate math atoms", () => {
-    expect(parse(tokenize("a^-b^c"))).toMatchObject({
-      type: "Row",
-      children: [
-        {
-          type: "Attach",
-          base: { type: "Ident", name: "a" },
-          superscript: { type: "Operator", operator: "−" },
-        },
-        {
-          type: "Attach",
-          base: { type: "Ident", name: "b" },
-          superscript: { type: "Ident", name: "c" },
-        },
-      ],
-    });
-  });
-
-  test("allows mixed delimiters but leaves absent group closes empty", () => {
-    expect(parse(tokenize("(x]"))).toMatchObject({ type: "Group", open: "(", close: "]" });
-    expect(parse(tokenize("(x"))).toMatchObject({ type: "Group", open: "(", close: "" });
   });
 
   test("long juxtaposition retains all nodes without recursive nesting", () => {

@@ -45,6 +45,7 @@ export type TokenType =
   | "NUMBER"
   | "STRING"
   | "LITERAL" // Escaped character: never interpreted as syntax or a symbol name.
+  | "ATOM" // A single math grapheme, distinct from a named identifier.
   | "IDENT"
   | "OPERATOR"
   | "LPAREN" // (
@@ -59,6 +60,8 @@ export type TokenType =
   | "CARET" // ^
   | "AMPERSAND" // &
   | "SLASH" // /
+  | "PRIMES" // One or more adjacent apostrophes.
+  | "ROOT" // √, ∛, ∜
   | "COMMA" // ,
   | "SEMICOLON" // ;
   | "COLON" // :
@@ -134,9 +137,8 @@ export interface CaseBranch {
  * AST Node definitions.
  *
  * NOTE: The AST contains only semantically meaningful nodes.
- * Temporary parser control tokens such as alignment markers (&)
- * are resolved into structural rows and cells during parsing and
- * never appear as AST nodes.
+ * Top-level layout markers become structural rows and cells. A marker used
+ * as a fraction/script operand remains an empty layout atom, as in Typst.
  */
 export type ASTNode =
   | NumberNode
@@ -153,6 +155,7 @@ export type ASTNode =
   | CasesNode
   | RowNode
   | TableNode
+  | LayoutMarkerNode
   | SpaceNode
   | ErrorNode;
 
@@ -162,6 +165,11 @@ export interface BaseNode {
   readonly sourceName?: string;
   readonly start?: number;
   readonly end?: number;
+}
+
+export interface LayoutMarkerNode extends BaseNode {
+  readonly type: "LayoutMarker";
+  readonly kind: "alignment" | "linebreak";
 }
 
 export interface NumberNode extends BaseNode {
@@ -210,6 +218,8 @@ export interface FractionNode extends BaseNode {
 export interface AttachNode extends BaseNode {
   readonly type: "Attach";
   readonly base: ASTNode;
+  /** Prime shorthand attaches on the right, even for bases with limits. */
+  readonly primes?: number;
   readonly subscript?: ASTNode;
   readonly superscript?: ASTNode;
   // For multiscripts:

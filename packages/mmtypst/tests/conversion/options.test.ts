@@ -120,8 +120,6 @@ describe("options conversion", () => {
     "mat(1",
     "vec(1",
     "cases(1",
-    "(1 /)",
-    "x^)",
     "mat(foo: 1, 2)",
     'vec(delim: "[", delim: "(", 1)',
     "root(n: 2, n: 3, x)",

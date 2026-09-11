@@ -49,6 +49,9 @@ All options are optional.
 | `unknownNames` | `"render" \| "error"`    | `"render"`  | How to handle unknown multi-character identifiers and function names. |
 
 The lower-level `tokenize`, `parse`, and `generateMathML` functions are also exported.
+The parser represents math as sequences of atoms with fraction/attachment
+structure, without evaluating arithmetic. See the [parser contract](docs/math-parser.md)
+for syntax rules, AST changes, and the optional Typst compiler comparison test.
 
 ## Fonts
 

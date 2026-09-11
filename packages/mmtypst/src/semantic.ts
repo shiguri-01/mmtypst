@@ -83,6 +83,7 @@ export function resolveAST(node: ASTNode, options: TypstToMathMLOptions = {}): A
       const name = sourceName(node);
       const replacement = customSymbol(node, options);
       const isUnknown =
+        node.isUnknown !== false &&
         replacement === undefined &&
         Array.from(name).length > 1 &&
         !Object.hasOwn(SYMBOLS, name) &&

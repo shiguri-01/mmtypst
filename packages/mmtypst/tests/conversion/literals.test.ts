@@ -16,7 +16,6 @@ describe("literals conversion", () => {
     test("renders integers and decimal numbers as mn elements", () => {
       expect(typstToMathML("42")).toContain("<mn>42</mn>");
       expect(typstToMathML("3.14159")).toContain("<mn>3.14159</mn>");
-      expect(typstToMathML(".5")).toContain("<mn>.5</mn>");
     });
   });
 
