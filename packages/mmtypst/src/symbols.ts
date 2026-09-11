@@ -18,7 +18,7 @@ export enum Precedence {
   MUL = 3, // *, times, div
   IMPLICIT_MUL = 4, // juxtaposition: 2x, sin x, a b
   FRAC = 5, // /
-  PREFIX = 6, // unary -, +
+  PREFIX = 4.5, // unary -, +
   ATTACH = 7, // _, ^
   POSTFIX = 8, // !, '
   CALL = 9, // f(...)

@@ -9,6 +9,12 @@ describe("fractions conversion", () => {
         "<mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac>",
       );
     });
+
+    test("binds slash division tighter than prefix minus", () => {
+      expect(typstToMathML("-a/b")).toContain(
+        "<mrow><mo>−</mo><mfrac><mrow><mi>a</mi></mrow><mrow><mi>b</mi></mrow></mfrac></mrow>",
+      );
+    });
   });
 
   describe("parenthesis unwrapping", () => {
