@@ -396,7 +396,13 @@ function parseScriptOperand(state: ParseState, stop: TokenType): ParseResult<AST
   if (boundary(peek(state))) {
     return failure(state, "Expected script operand");
   }
-  const result = parseExpression(state, Precedence.ATTACH - 1, stop);
+  // In Typst math, a sign after an attachment is an operator atom, not a
+  // unary expression. Thus `x^-1` is `x^−` followed by `1`.
+  const token = peek(state);
+  const result =
+    token.type === "OPERATOR" && ["+", "-", "−"].includes(token.value)
+      ? parsePrimary(state)
+      : parseExpression(state, Precedence.ATTACH - 1, stop);
   return result.ok ? { ...result, value: unparen(result.value) } : result;
 }
 
@@ -495,7 +501,12 @@ export function parseExpression(
       if (boundary(peek(next(cursor)))) {
         return failure(cursor, "Expected denominator after /");
       }
-      const denominator = parseExpression(next(cursor), Precedence.FRAC);
+      // In Typst math, a sign immediately after `/` is an operator atom, not
+      // a unary expression. This keeps `a/-b/c` as `a/−` followed by `b/c`.
+      const denominator =
+        peek(next(cursor)).type === "OPERATOR" && ["+", "-", "−"].includes(peek(next(cursor)).value)
+          ? parsePrimary(next(cursor))
+          : parseExpression(next(cursor), Precedence.FRAC);
       if (!denominator.ok) {
         return denominator;
       }

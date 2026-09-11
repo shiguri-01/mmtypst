@@ -10,16 +10,12 @@ describe("expressions conversion", () => {
       );
     });
 
-    test("preserves negative numbers in exponent", () => {
-      expect(typstToMathML("x^-1")).toContain(
-        "<msup><mi>x</mi><mrow><mo>−</mo><mn>1</mn></mrow></msup>",
-      );
+    test("keeps a sign after an exponent marker as a separate atom", () => {
+      expect(typstToMathML("x^-1")).toContain("<msup><mi>x</mi><mo>−</mo></msup><mn>1</mn>");
     });
 
-    test("preserves negative numbers in subscript", () => {
-      expect(typstToMathML("x_-1")).toContain(
-        "<msub><mi>x</mi><mrow><mo>−</mo><mn>1</mn></mrow></msub>",
-      );
+    test("keeps a sign after a subscript marker as a separate atom", () => {
+      expect(typstToMathML("x_-1")).toContain("<msub><mi>x</mi><mo>−</mo></msub><mn>1</mn>");
     });
   });
 
