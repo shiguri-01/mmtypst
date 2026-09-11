@@ -77,14 +77,6 @@ export interface Token {
 }
 
 /**
- * Explicit state of the parser cursor.
- */
-export interface ParseState {
-  readonly tokens: readonly Token[];
-  readonly pos: number;
-}
-
-/**
  * Structured parse error.
  */
 export type ParseError =
@@ -109,21 +101,6 @@ export type ParseError =
       readonly message: string;
       readonly position: number;
     };
-
-/**
- * Result of a parser step: either success with value and new state,
- * or failure with structured error and state at failure.
- */
-export type ParseResult<T> =
-  | { readonly ok: true; readonly value: T; readonly state: ParseState }
-  | { readonly ok: false; readonly error: ParseError; readonly state: ParseState };
-
-/**
- * Function call arguments.
- */
-export type Argument =
-  | { readonly type: "Positional"; readonly value: ASTNode }
-  | { readonly type: "Named"; readonly name: string; readonly value: ASTNode };
 
 /**
  * A branch in a cases expression: an expression and an optional condition.

@@ -1,14 +1,14 @@
 import { MATH_FUNCTIONS, SPACES, SYMBOLS } from "./symbols.ts";
-import type {
-  ASTNode,
-  AttachNode,
-  CaseBranch,
-  ParseError,
-  ParseResult,
-  ParseState,
-  Token,
-  TokenType,
-} from "./types.ts";
+import type { ASTNode, AttachNode, CaseBranch, ParseError, Token, TokenType } from "./types.ts";
+
+interface ParseState {
+  readonly tokens: readonly Token[];
+  readonly pos: number;
+}
+
+type ParseResult<T> =
+  | { readonly ok: true; readonly value: T; readonly state: ParseState }
+  | { readonly ok: false; readonly error: ParseError; readonly state: ParseState };
 
 export function createState(tokens: readonly Token[]): ParseState {
   return { tokens, pos: 0 };

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
 
-import { invalidSources, sources, typstTree } from "../tests/typst-reference.ts";
+import { invalidSources, sources, typstTree } from "../tests/typst-conformance-reference.ts";
 
 // Wrap complete equations so Typst diagnoses unclosed comments as well. Newlines
 // keep a trailing line comment from consuming the closing math delimiter.
@@ -41,5 +41,8 @@ assert.equal(version.status, 0, version.stderr);
 const fixture = { typst: version.stdout.trim(), valid, invalid: invalidSources };
 const directory = new URL("../tests/fixtures/", import.meta.url);
 mkdirSync(directory, { recursive: true });
-writeFileSync(new URL("typst.json", directory), JSON.stringify(fixture, null, 2) + "\n");
+writeFileSync(
+  new URL("typst-conformance.json", directory),
+  JSON.stringify(fixture, null, 2) + "\n",
+);
 console.info(`Generated ${valid.length + invalidSources.length} cases with ${fixture.typst}`);

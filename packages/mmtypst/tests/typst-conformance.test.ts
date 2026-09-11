@@ -4,10 +4,10 @@ import { describe, expect, test } from "vite-plus/test";
 
 import { parse, tokenize } from "../src/index.ts";
 import { resolveAST } from "../src/semantic.ts";
-import { astTree, invalidSources, sources, type Tree } from "./typst-reference.ts";
+import { astTree, invalidSources, sources, type Tree } from "./typst-conformance-reference.ts";
 
 const reference = JSON.parse(
-  readFileSync(new URL("./fixtures/typst.json", import.meta.url), "utf8"),
+  readFileSync(new URL("./fixtures/typst-conformance.json", import.meta.url), "utf8"),
 ) as { typst: string; valid: [string, Tree][]; invalid: string[] };
 
 test("Typst fixtures cover the current corpus", () => {

@@ -1,10 +1,12 @@
 import { defineConfig } from "vite-plus";
 
+export const generatedFixtures = ["tests/fixtures/**/*.json"];
+
 export default defineConfig({
   run: {
     tasks: {
-      "update-typst-fixtures": {
-        command: "node scripts/update-typst-fixtures.ts && vp fmt tests/fixtures/typst.json",
+      "update-typst-conformance": {
+        command: "node scripts/update-typst-conformance.ts",
         cache: false,
       },
     },
@@ -16,10 +18,13 @@ export default defineConfig({
     exports: true,
   },
   lint: {
+    ignorePatterns: generatedFixtures,
     options: {
       typeAware: true,
       typeCheck: true,
     },
   },
-  fmt: {},
+  fmt: {
+    ignorePatterns: generatedFixtures,
+  },
 });

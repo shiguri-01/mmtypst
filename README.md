@@ -22,7 +22,7 @@ require the compiler. After changing the corpus or the version in
 
 ```bash
 mise install
-mise exec -- vp run mmtypst#update-typst-fixtures
+mise exec -- vp run mmtypst#update-typst-conformance
 ```
 
 - Verify lint, formatting, tests, and build:
