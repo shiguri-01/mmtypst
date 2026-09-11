@@ -247,7 +247,7 @@ export interface GroupNode extends BaseNode {
 
 export interface MatrixNode extends BaseNode {
   readonly type: "Matrix";
-  readonly delimiter: string; // "(", "[", "{", "|", "||", "none"
+  readonly delimiter: string; // Opening or neutral delimiter character.
   readonly rows: ReadonlyArray<readonly ASTNode[]>;
 }
 

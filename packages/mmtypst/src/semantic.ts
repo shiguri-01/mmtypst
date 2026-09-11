@@ -1,11 +1,4 @@
-import {
-  ACCENT_SYMBOLS,
-  DELIMITERS,
-  DELIMITER_SHORTHANDS,
-  FONT_VARIANTS,
-  MATH_FUNCTIONS,
-  SYMBOLS,
-} from "./symbols.ts";
+import { ACCENT_SYMBOLS, DELIMITERS, FONT_VARIANTS, MATH_FUNCTIONS, SYMBOLS } from "./symbols.ts";
 import type { ASTNode, FunctionCallNode, TypstToMathMLOptions } from "./types.ts";
 
 type FunctionSignature = {
@@ -14,37 +7,15 @@ type FunctionSignature = {
   named?: readonly string[];
 };
 
-const attachmentAliases = [
-  ["t", "top"],
-  ["b", "bottom"],
-  ["tl", "topLeft"],
-  ["tr", "topRight"],
-  ["bl", "bottomLeft"],
-  ["br", "bottomRight"],
-] as const;
-
 const signatures: Record<string, FunctionSignature> = {
   frac: { min: 2, max: 2 },
   sqrt: { min: 1, max: 1 },
-  root: { min: 1, max: 2, named: ["n", "index"] },
+  root: { min: 2, max: 2 },
   binom: { min: 2 },
   attach: {
     min: 1,
     max: 1,
-    named: [
-      "t",
-      "b",
-      "tl",
-      "tr",
-      "bl",
-      "br",
-      "top",
-      "bottom",
-      "topLeft",
-      "topRight",
-      "bottomLeft",
-      "bottomRight",
-    ],
+    named: ["t", "b", "tl", "tr", "bl", "br"],
   },
   mat: { min: 1 },
   vec: { min: 1 },
@@ -60,7 +31,6 @@ const signatures: Record<string, FunctionSignature> = {
   ceil: { min: 1, max: 1 },
   round: { min: 1, max: 1 },
   "bracket.stroked": { min: 1, max: 1 },
-  "bracket.double": { min: 1, max: 1 },
 };
 
 for (const name of Object.keys(ACCENT_SYMBOLS)) {
@@ -213,22 +183,6 @@ function resolveFunctionCall(node: FunctionCallNode, options: TypstToMathMLOptio
     return semanticError(node, `Unknown named argument for ${name}`);
   }
 
-  if (name === "root") {
-    const hasNamedIndex = namedArgs?.n !== undefined || namedArgs?.index !== undefined;
-    const hasBothAliases = namedArgs?.n !== undefined && namedArgs.index !== undefined;
-    if (hasBothAliases || (args.length > 1 && hasNamedIndex)) {
-      return semanticError(node, "Conflicting root index arguments");
-    }
-  }
-
-  if (name === "attach" && namedArgs) {
-    for (const [short, long] of attachmentAliases) {
-      if (namedArgs[short] !== undefined && namedArgs[long] !== undefined) {
-        return semanticError(node, `Conflicting attachment arguments: ${short}, ${long}`);
-      }
-    }
-  }
-
   return { ...node, args, namedArgs };
 }
 
@@ -266,12 +220,5 @@ function customSymbol(node: NamedNode, options: TypstToMathMLOptions): string | 
 }
 
 function validDelimiter(delimiter: string): boolean {
-  if (delimiter === "none") {
-    return true;
-  }
-
-  const canonical = Object.hasOwn(DELIMITER_SHORTHANDS, delimiter)
-    ? DELIMITER_SHORTHANDS[delimiter]
-    : delimiter;
-  return Object.hasOwn(DELIMITERS, canonical) && DELIMITERS[canonical].class !== "close";
+  return Object.hasOwn(DELIMITERS, delimiter) && DELIMITERS[delimiter].class !== "close";
 }

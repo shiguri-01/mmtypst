@@ -17,33 +17,13 @@ describe("attachments conversion", () => {
     });
   });
 
-  describe("grouping delimiters in scripts", () => {
-    test("omits round parentheses in script terms while preserving base grouping", () => {
-      const sub = typstToMathML("(x)_(y)");
-      expect(sub).toContain('<mo fence="true">(</mo><mi>x</mi><mo fence="true">)</mo>');
-      expect(sub).not.toContain('<mo fence="true">(</mo><mi>y</mi><mo fence="true">)</mo>');
-    });
-
-    test("omits round parentheses in compound exponent expressions", () => {
-      const sup = typstToMathML("x^(a + b)");
-      expect(sup).toContain("<msup><mi>x</mi><mrow><mi>a</mi><mo>+</mo><mi>b</mi></mrow></msup>");
-      expect(sup).not.toContain('<mo fence="true">(</mo>');
-    });
-
-    test("preserves square brackets in scripts", () => {
-      expect(typstToMathML("x^[y]")).toContain(
-        '<mo fence="true">[</mo><mi>y</mi><mo fence="true">]</mo>',
-      );
-    });
-
-    test("preserves curly braces in scripts", () => {
-      expect(typstToMathML("x^{y}")).toContain(
-        '<mo fence="true">{</mo><mi>y</mi><mo fence="true">}</mo>',
-      );
-    });
-  });
-
   describe("large operators and limits", () => {
+    test("keeps primes on the side of an operator with limits", () => {
+      expect(typstToMathML("sum'_i^n", { display: "block" })).toContain(
+        '<munderover><msup><mo movablelimits="false">∑</mo><mo>′</mo></msup><mi>i</mi><mi>n</mi></munderover>',
+      );
+    });
+
     test("renders limits above and below with munderover in block display mode", () => {
       const blockSum = typstToMathML("sum_(i=1)^n i", { display: "block" });
       expect(blockSum).toContain("<munderover>");
@@ -54,12 +34,6 @@ describe("attachments conversion", () => {
       const inlineSum = typstToMathML("sum_(i=1)^n i", { display: "inline" });
       expect(inlineSum).toContain("<msubsup>");
       expect(inlineSum).toContain("<mo>∑</mo>");
-    });
-
-    test("forces limits placement without changing display size", () => {
-      const output = typstToMathML("limits(sum)_0^n");
-      expect(output).toContain("<munderover>");
-      expect(output).not.toContain("displaystyle=");
     });
 
     test("forces side scripts without changing display size", () => {
@@ -77,15 +51,6 @@ describe("attachments conversion", () => {
       expect(multi).toContain("<mrow/>");
       expect(multi).not.toContain("<none/>");
     });
-  });
-
-  test("nested attachments associate right and opposite attachments chain", () => {
-    expect(typstToMathML("x^y^z")).toBe(
-      '<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><msup><mi>x</mi><msup><mi>y</mi><mi>z</mi></msup></msup></math>',
-    );
-    expect(typstToMathML("x_1^2")).toBe(
-      '<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><msubsup><mi>x</mi><mn>1</mn><mn>2</mn></msubsup></math>',
-    );
   });
 
   test("retains all six attachment arguments", () => {

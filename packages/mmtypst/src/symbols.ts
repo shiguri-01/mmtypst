@@ -112,13 +112,6 @@ export const SHORTHANDS: readonly ShorthandDef[] = [
   { pattern: "~", replacement: "∼", type: "OPERATOR" },
 ];
 
-/** Delimiter shorthands in Typst */
-export const DELIMITER_SHORTHANDS: Readonly<Record<string, string>> = {
-  "[|": "⟦",
-  "|]": "⟧",
-  "||": "‖",
-};
-
 export function isOpeningDelimiter(char: string): boolean {
   return DELIMITERS[char]?.class === "open";
 }
@@ -132,8 +125,7 @@ export function isFence(char: string): boolean {
 }
 
 export function getMatchingDelimiter(delim: string): string {
-  const resolved = DELIMITER_SHORTHANDS[delim] ?? delim;
-  return DELIMITERS[resolved]?.pair ?? resolved;
+  return DELIMITERS[delim]?.pair ?? delim;
 }
 
 /**
@@ -363,20 +355,12 @@ export const SYMBOLS: Readonly<Record<string, SymbolDef>> = {
   "bracket.r": { unicode: "]", type: "fence" },
   "bracket.l.stroked": { unicode: "⟦", type: "fence" },
   "bracket.r.stroked": { unicode: "⟧", type: "fence" },
-  "bracket.l.double": { unicode: "⟦", type: "fence" },
-  "bracket.r.double": { unicode: "⟧", type: "fence" },
-  "bracket.double.l": { unicode: "⟦", type: "fence" },
-  "bracket.double.r": { unicode: "⟧", type: "fence" },
   "bracket.t": { unicode: "⎴", type: "fence" },
   "bracket.b": { unicode: "⎵", type: "fence" },
   "paren.l": { unicode: "(", type: "fence" },
   "paren.r": { unicode: ")", type: "fence" },
   "brace.l": { unicode: "{", type: "fence" },
   "brace.r": { unicode: "}", type: "fence" },
-  "angle.l": { unicode: "⟨", type: "fence" },
-  "angle.r": { unicode: "⟩", type: "fence" },
-  "angle.l.double": { unicode: "⟪", type: "fence" },
-  "angle.r.double": { unicode: "⟫", type: "fence" },
   "floor.l": { unicode: "⌊", type: "fence" },
   "floor.r": { unicode: "⌋", type: "fence" },
   "ceil.l": { unicode: "⌈", type: "fence" },

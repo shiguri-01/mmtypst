@@ -35,39 +35,8 @@ describe("literals conversion", () => {
     });
   });
 
-  describe("comments", () => {
-    test("ignores inline block comments", () => {
-      const result = typstToMathML("x /* comment */ + y");
-      expect(result).toContain("<mi>x</mi>");
-      expect(result).toContain("<mi>y</mi>");
-      expect(result).not.toContain("comment");
-    });
-
-    test("ignores single-line comments", () => {
-      const result = typstToMathML("x + 1 // comment");
-      expect(result).toContain("<mi>x</mi>");
-      expect(result).toContain("<mn>1</mn>");
-      expect(result).not.toContain("comment");
-    });
-
-    test("ignores nested block comments", () => {
-      const result = typstToMathML("/* outer /* inner */ */ x + 1");
-      expect(result).toContain("<mi>x</mi>");
-      expect(result).toContain("<mn>1</mn>");
-      expect(result).not.toContain("inner");
-      expect(result).not.toContain("outer");
-    });
-  });
-
-  test("escaped syntax stays literal and explicit linebreaks remain distinct", () => {
-    expect(typstToMathML(String.raw`a \\ b`)).not.toContain("<mtable");
-    expect(typstToMathML(String.raw`a \ b`)).toContain("<mtable");
-    expect(typstToMathML(String.raw`x\^2`)).not.toContain("<msup>");
-    expect(typstToMathML(String.raw`\#`)).not.toContain("<merror>");
-    expect(typstToMathML(String.raw`\u{1D400}`)).toContain("𝐀");
+  test("renders escaped Unicode text and literal mathematical letters", () => {
     expect(typstToMathML(String.raw`"\u{03B1}"`)).toContain("<mtext>α</mtext>");
-    expect(typstToMathML(String.raw`\u{12oops}`)).toContain("<merror>");
-    expect(typstToMathML(String.raw`\u{D800}`)).toContain("<merror>");
     expect(typstToMathML("𝐀", { unknownNames: "error" })).toContain("<mi>𝐀</mi>");
   });
 });

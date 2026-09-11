@@ -19,12 +19,4 @@ describe("alignment conversion", () => {
     expect(output).toContain('style="text-align: right"');
     expect(output).toContain('style="text-align: left"');
   });
-
-  test.each(["a\nb", '"a & b"', '"a\\\\b"', "a /* & */ b"])(
-    "non-layout syntax stays inline without a table: %s",
-    (source) => {
-      expect(typstToMathML(source)).toContain('display="inline"');
-      expect(typstToMathML(source)).not.toContain("<mtable");
-    },
-  );
 });

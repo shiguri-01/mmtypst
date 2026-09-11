@@ -51,7 +51,7 @@ All options are optional.
 The lower-level `tokenize`, `parse`, and `generateMathML` functions are also exported.
 The parser represents math as sequences of atoms with fraction/attachment
 structure, without evaluating arithmetic. See the [parser contract](docs/math-parser.md)
-for syntax rules, AST changes, and the optional Typst compiler comparison test.
+for syntax rules, AST changes, and the Typst compiler comparison tests.
 
 ## Fonts
 
@@ -79,7 +79,8 @@ for more about math fonts and platform support.
 
 ## Limitations
 
-`mmtypst` targets Typst 0.15.1 math syntax for standalone expressions.
+`mmtypst` targets standalone math syntax from the Typst version selected by
+[`mise.toml`](../../mise.toml).
 
 - Typst code is not evaluated, including variable definitions, imports, and
   `set`/`show` rules.

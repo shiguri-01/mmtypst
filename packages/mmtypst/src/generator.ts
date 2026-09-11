@@ -2,7 +2,6 @@ import { combineFontVariant, toMathAlphanumeric } from "./math-fonts.ts";
 import { resolveAST } from "./semantic.ts";
 import {
   ACCENT_SYMBOLS,
-  DELIMITER_SHORTHANDS,
   FONT_VARIANTS,
   getMatchingDelimiter,
   isFence,
@@ -232,7 +231,6 @@ const FENCE_FUNCTIONS: Readonly<Record<string, readonly [open: string, close: st
   ceil: ["⌈", "⌉"],
   round: ["⌊", "⌉"],
   "bracket.stroked": ["⟦", "⟧"],
-  "bracket.double": ["⟦", "⟧"],
 };
 
 // Built-in decoration functions: overline, underline, overbrace, underbrace
@@ -334,20 +332,9 @@ function renderFunctionCall(node: FunctionCallNode, ctx: RenderContext): string 
 }
 
 function renderRoot(node: FunctionCallNode, ctx: RenderContext): string {
-  const args = node.args;
-  const namedArgs = node.namedArgs ?? {};
-
-  const degreeArg = namedArgs["n"] ?? namedArgs["index"] ?? (args.length > 1 ? args[0] : undefined);
-  const radicandArg = args.length > 1 ? args[1] : args[0];
-  const radicand = radicandArg ? renderNode(radicandArg, ctx) : "";
-  if (degreeArg) {
-    const degree =
-      typeof degreeArg === "string"
-        ? `<mtext>${escapeText(degreeArg)}</mtext>`
-        : renderNode(degreeArg, { ...ctx, displayStyle: false });
-    return `<mroot>${radicand}${degree}</mroot>`;
-  }
-  return `<msqrt>${radicand}</msqrt>`;
+  const degree = renderNode(node.args[0], { ...ctx, displayStyle: false });
+  const radicand = renderNode(node.args[1], ctx);
+  return `<mroot>${radicand}${degree}</mroot>`;
 }
 
 function renderBinomial(node: FunctionCallNode, ctx: RenderContext): string {
@@ -366,20 +353,20 @@ function renderAttachmentCall(node: FunctionCallNode, ctx: RenderContext): strin
   const args = node.args;
   const namedArgs = node.namedArgs ?? {};
 
-  const arg = (key: string, alias: string): ASTNode | undefined => {
-    const value = namedArgs[key] ?? namedArgs[alias];
+  const arg = (key: string): ASTNode | undefined => {
+    const value = namedArgs[key];
     return typeof value === "string" ? { type: "String", value } : value;
   };
   return renderAttach(
     {
       type: "Attach",
       base: args[0],
-      subscript: arg("b", "bottom"),
-      superscript: arg("t", "top"),
-      bottomLeft: arg("bl", "bottomLeft"),
-      topLeft: arg("tl", "topLeft"),
-      bottomRight: arg("br", "bottomRight"),
-      topRight: arg("tr", "topRight"),
+      subscript: arg("b"),
+      superscript: arg("t"),
+      bottomLeft: arg("bl"),
+      topLeft: arg("tl"),
+      bottomRight: arg("br"),
+      topRight: arg("tr"),
     },
     ctx,
   );
@@ -393,13 +380,8 @@ function renderGroup(node: GroupNode, ctx: RenderContext): string {
 }
 
 function renderMatrix(node: MatrixNode, ctx: RenderContext): string {
-  const delim = node.delimiter || "(";
-  let openFence = "";
-  let closeFence = "";
-  if (delim !== "none") {
-    openFence = DELIMITER_SHORTHANDS[delim] ?? delim;
-    closeFence = getMatchingDelimiter(openFence);
-  }
+  const openFence = node.delimiter;
+  const closeFence = getMatchingDelimiter(openFence);
 
   const rowsXml = node.rows
     .map((row) => {
@@ -409,10 +391,6 @@ function renderMatrix(node: MatrixNode, ctx: RenderContext): string {
     .join("");
 
   const tableXml = `<mtable>${rowsXml}</mtable>`;
-  if (!openFence && !closeFence) {
-    return tableXml;
-  }
-
   return `<mrow><mo fence="true">${escapeText(openFence)}</mo>${tableXml}<mo fence="true">${escapeText(closeFence)}</mo></mrow>`;
 }
 
@@ -431,8 +409,7 @@ function renderCases(node: CasesNode, ctx: RenderContext): string {
     })
     .join("");
 
-  const delim = node.delimiter ?? "{";
-  const openFence = delim === "none" ? "" : (DELIMITER_SHORTHANDS[delim] ?? delim);
+  const openFence = node.delimiter ?? "{";
   const openMo = openFence ? `<mo fence="true">${escapeText(openFence)}</mo>` : "";
 
   return `<mrow>${openMo}<mtable class="cases">${rowsXml}</mtable></mrow>`;
