@@ -76,8 +76,7 @@ for more about math fonts and platform support.
 
 ## Limitations
 
-`mmtypst` targets standalone math syntax from the Typst version selected by
-[`mise.toml`](../../mise.toml).
+`mmtypst` targets standalone math syntax from Typst 0.15.1.
 
 - Typst code is not evaluated, including variable definitions, imports, and
   `set`/`show` rules.
