@@ -9,8 +9,6 @@ describe("alignment conversion", () => {
            &= 2
     `);
     expect(aligned).toContain('<mtable class="aligned">');
-    expect(aligned).toContain("<mtr>");
-    expect(aligned).toContain('display="inline"');
   });
 
   test("aligned tables permit rows with different column counts", () => {

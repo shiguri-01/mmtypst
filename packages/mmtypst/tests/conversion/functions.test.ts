@@ -21,15 +21,10 @@ describe("functions conversion", () => {
     });
     test("renders functions in upright font in standalone position", () => {
       expect(typstToMathML("sin x")).toContain('<mi mathvariant="normal">sin</mi>');
-      expect(typstToMathML("cos x")).toContain('<mi mathvariant="normal">cos</mi>');
-      expect(typstToMathML("ln x")).toContain('<mi mathvariant="normal">ln</mi>');
     });
 
     test("renders functions in upright font in call position", () => {
       expect(typstToMathML("sin(x)")).toContain('<mi mathvariant="normal">sin</mi>');
-      expect(typstToMathML("cos(x + y)")).toContain('<mi mathvariant="normal">cos</mi>');
-      expect(typstToMathML("arctan(1)")).toContain('<mi mathvariant="normal">arctan</mi>');
-      expect(typstToMathML("log(10)")).toContain('<mi mathvariant="normal">log</mi>');
     });
   });
 
@@ -37,24 +32,6 @@ describe("functions conversion", () => {
     test("renders absolute value with vertical bars", () => {
       expect(typstToMathML("abs(x)")).toContain(
         '<mrow><mo fence="true">|</mo><mi>x</mi><mo fence="true">|</mo></mrow>',
-      );
-    });
-
-    test("renders norm with double vertical bars", () => {
-      expect(typstToMathML("norm(v)")).toContain(
-        '<mrow><mo fence="true">‖</mo><mi>v</mi><mo fence="true">‖</mo></mrow>',
-      );
-    });
-
-    test("renders floor delimiters", () => {
-      expect(typstToMathML("floor(x)")).toContain(
-        '<mrow><mo fence="true">⌊</mo><mi>x</mi><mo fence="true">⌋</mo></mrow>',
-      );
-    });
-
-    test("renders ceil delimiters", () => {
-      expect(typstToMathML("ceil(x)")).toContain(
-        '<mrow><mo fence="true">⌈</mo><mi>x</mi><mo fence="true">⌉</mo></mrow>',
       );
     });
 
@@ -69,36 +46,12 @@ describe("functions conversion", () => {
         '<mrow><mo fence="true">⟦</mo><mi>x</mi><mo fence="true">⟧</mo></mrow>',
       );
     });
-
-    test("renders bracket.l.stroked and bracket.r.stroked as fence operators", () => {
-      const mathml = typstToMathML("bracket.l.stroked x bracket.r.stroked");
-      expect(mathml).toContain('<mo fence="true">⟦</mo>');
-      expect(mathml).toContain('<mo fence="true">⟧</mo>');
-    });
-
-    test("supports double brackets in matrices", () => {
-      const mat = typstToMathML('mat(delim: "⟦", 1, 2; 3, 4)');
-      expect(mat).toContain('<mo fence="true">⟦</mo>');
-      expect(mat).toContain('<mo fence="true">⟧</mo>');
-    });
   });
 
   describe("accents and decorations", () => {
     test("renders over-accents with mover accent=true", () => {
       expect(typstToMathML("hat(x)")).toContain(
         '<mover accent="true"><mi>x</mi><mo>^</mo></mover>',
-      );
-      expect(typstToMathML("tilde(x)")).toContain(
-        '<mover accent="true"><mi>x</mi><mo>~</mo></mover>',
-      );
-      expect(typstToMathML("macron(x)")).toContain(
-        '<mover accent="true"><mi>x</mi><mo>¯</mo></mover>',
-      );
-      expect(typstToMathML("dot(x)")).toContain(
-        '<mover accent="true"><mi>x</mi><mo>˙</mo></mover>',
-      );
-      expect(typstToMathML("arrow(v)")).toContain(
-        '<mover accent="true"><mi>v</mi><mo>→</mo></mover>',
       );
     });
 

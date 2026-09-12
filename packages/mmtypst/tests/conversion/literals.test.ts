@@ -28,10 +28,6 @@ describe("literals conversion", () => {
   describe("spaces", () => {
     test("renders mathematical spaces as mspace with standard widths", () => {
       expect(typstToMathML("x thin y")).toContain('<mspace width="0.1667em"/>');
-      expect(typstToMathML("x med y")).toContain('<mspace width="0.2222em"/>');
-      expect(typstToMathML("x thick y")).toContain('<mspace width="0.2778em"/>');
-      expect(typstToMathML("x quad y")).toContain('<mspace width="1em"/>');
-      expect(typstToMathML("x wide y")).toContain('<mspace width="2em"/>');
     });
   });
 

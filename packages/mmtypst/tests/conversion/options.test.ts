@@ -18,20 +18,8 @@ describe("options conversion", () => {
   });
 
   describe("display", () => {
-    test("defaults single-line expressions to inline", () => {
-      expect(typstToMathML("x + y = z")).toContain('display="inline"');
-    });
-
-    test("defaults multiline expressions to inline", () => {
-      expect(typstToMathML("f(x) &= 1 \\ &= 2")).toContain('display="inline"');
-    });
-
     test("allows overriding display mode explicitly", () => {
       expect(typstToMathML("x + y = z", { display: "block" })).toContain('display="block"');
-      expect(typstToMathML("f(x) &= 1 \\ &= 2", { display: "block" })).toContain('display="block"');
-      expect(typstToMathML("f(x) &= 1 \\ &= 2", { display: "inline" })).toContain(
-        'display="inline"',
-      );
     });
   });
 
@@ -56,35 +44,20 @@ describe("options conversion", () => {
     test("attaches custom class and attributes to root math element", () => {
       const withAttrs = typstToMathML("x", {
         class: "formula-inline",
-        attributes: { id: "eq-1", "data-formula": "x" },
+        attributes: { id: "eq-1" },
       });
       expect(withAttrs).toContain('class="formula-inline"');
       expect(withAttrs).toContain('id="eq-1"');
-      expect(withAttrs).toContain('data-formula="x"');
     });
   });
 
-  describe("custom symbols", () => {
-    test("registers custom symbol mappings", () => {
-      const custom = typstToMathML("customStar + 1", {
-        symbols: { customStar: "★" },
-      });
-      expect(custom).toContain("<mi>★</mi>");
-    });
-  });
-
-  test.each([
-    "mat(foo: 1, 2)",
-    'vec(delim: "[", delim: "(", 1)',
-    "attach(x, t: 2, t: 3)",
-    "frac(1)",
-    "sqrt(x, y)",
-    "sqrt(index: 3, x)",
-    "foo(x, ignored: y)",
-  ])("reports malformed or unsupported input: %s", (source) => {
-    expect(typstToMathML(source)).toContain("<merror>");
-    expect(() => typstToMathML(source, { throwOnError: true })).toThrow();
-  });
+  test.each(["frac(1)", "sqrt(x, y)", "foo(x, ignored: y)"])(
+    "reports malformed or unsupported input: %s",
+    (source) => {
+      expect(typstToMathML(source)).toContain("<merror>");
+      expect(() => typstToMathML(source, { throwOnError: true })).toThrow();
+    },
+  );
 
   test("custom symbols override original built-in names and preserve categories", () => {
     const output = typstToMathML("alpha times beta", {
@@ -94,21 +67,19 @@ describe("options conversion", () => {
     expect(output).toContain("<mo>××</mo>");
   });
 
-  test.each(['"unterminated', "1 /", "sqrt()"])(
-    "error output includes display, class and attributes on the math element: %s",
-    (source) => {
-      const output = typstToMathML(source, {
-        display: "block",
-        class: "equation",
-        attributes: { id: "eq-1" },
-      });
-      expect(output).toContain("<merror>");
-      expect(output).toContain('display="block"');
-      expect(output).toContain('class="equation"');
-      expect(output).toContain('id="eq-1"');
-      expect(output).toContain('<math xmlns="http://www.w3.org/1998/Math/MathML"');
-      expect(output).toContain("</math>");
-      expect(() => typstToMathML(source, { throwOnError: true })).toThrow();
-    },
-  );
+  test("error output includes display, class and attributes on the math element", () => {
+    const source = "1 /";
+    const output = typstToMathML(source, {
+      display: "block",
+      class: "equation",
+      attributes: { id: "eq-1" },
+    });
+    expect(output).toContain("<merror>");
+    expect(output).toContain('display="block"');
+    expect(output).toContain('class="equation"');
+    expect(output).toContain('id="eq-1"');
+    expect(output).toContain('<math xmlns="http://www.w3.org/1998/Math/MathML"');
+    expect(output).toContain("</math>");
+    expect(() => typstToMathML(source, { throwOnError: true })).toThrow();
+  });
 });

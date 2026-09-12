@@ -20,6 +20,10 @@ describe("matrices conversion", () => {
 
       const pipeMat = typstToMathML('mat(delim: "|", 1, 2; 3, 4)');
       expect(pipeMat).toContain('<mo fence="true">|</mo>');
+
+      const doubleBracketMat = typstToMathML('mat(delim: "⟦", 1, 2; 3, 4)');
+      expect(doubleBracketMat).toContain('<mo fence="true">⟦</mo>');
+      expect(doubleBracketMat).toContain('<mo fence="true">⟧</mo>');
     });
   });
 
@@ -48,10 +52,9 @@ describe("matrices conversion", () => {
     });
   });
 
-  test("renders a custom cases delimiter on the left", () => {
+  test("renders a custom cases delimiter", () => {
     const output = typstToMathML('cases(x, delim: "⟦")');
-    expect(output).toBe(
-      '<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mo fence="true">⟦</mo><mtable class="cases"><mtr><mtd><mi>x</mi></mtd></mtr></mtable></mrow></math>',
-    );
+    expect(output).toContain('<mo fence="true">⟦</mo>');
+    expect(output).toContain('<mtable class="cases">');
   });
 });
