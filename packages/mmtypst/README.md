@@ -52,16 +52,26 @@ The lower-level `tokenize`, `parse`, and `generateMathML` functions are also exp
 ## Fonts
 
 `mmtypst` uses the browser's native MathML rendering and does not bundle fonts.
-Available math fonts vary across devices. For more consistent rendering, load
-a math web font and apply it to your `<math>` elements.
+Browsers provide the basic mathematical layout and select an available math
+font. To explicitly request the browser's math font, add:
+
+```css
+math {
+  font-family: math;
+}
+```
+
+The selected font and rendering vary across browsers and devices. For more
+consistent results, load a math web font before the `math` fallback.
 
 For example, download [STIX Two Math](https://github.com/stipub/stixfonts), serve
-`STIXTwoMath-Regular.otf` from your site's `/fonts/` directory, and add this CSS:
+`STIXTwoMath-Regular.woff2` from your site's `/fonts/` directory, and add this CSS:
 
 ```css
 @font-face {
   font-family: "STIX Two Math";
-  src: url("/fonts/STIXTwoMath-Regular.otf") format("opentype");
+  src: url("/fonts/STIXTwoMath-Regular.woff2") format("woff2");
+  font-display: swap;
 }
 
 math {
