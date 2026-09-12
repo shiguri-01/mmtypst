@@ -6,7 +6,7 @@ describe("fonts conversion", () => {
   test("maps font styling functions to MathML Core characters", () => {
     expect(typstToMathML("bold(x)")).toContain("𝐱");
     expect(typstToMathML("italic(x)")).toContain("𝑥");
-    expect(typstToMathML("upright(A)")).toContain('mathvariant="normal"');
+    expect(typstToMathML("upright(A)")).toContain('<mi mathvariant="normal">A</mi>');
     expect(typstToMathML("bb(R)")).toContain("ℝ");
     expect(typstToMathML("cal(F)")).toContain("ℱ");
     expect(typstToMathML("frak(g)")).toContain("𝔤");
@@ -17,10 +17,7 @@ describe("fonts conversion", () => {
   test("uses Core font characters for Greek, digits and legacy exceptions", () => {
     expect(typstToMathML("bold(alpha)")).toContain("𝛂");
     expect(typstToMathML("italic(h)")).toContain("ℎ");
-    expect(typstToMathML("bb(R)")).toContain("ℝ");
     expect(typstToMathML("bold(12)")).toContain("𝟏𝟐");
-    expect(typstToMathML("bold(italic(x))")).toContain("𝒙");
-    expect(typstToMathML("upright(A)")).toContain('<mi mathvariant="normal">A</mi>');
   });
 
   test.each([

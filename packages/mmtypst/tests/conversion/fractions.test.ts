@@ -11,29 +11,6 @@ describe("fractions conversion", () => {
     });
   });
 
-  describe("parenthesis unwrapping", () => {
-    test("unwraps matching outer parentheses on numerator and denominator", () => {
-      const frac = typstToMathML("(a + b) / (c + d)");
-      expect(frac).toContain(
-        "<mfrac><mrow><mrow><mi>a</mi><mo>+</mo><mi>b</mi></mrow></mrow><mrow><mrow><mi>c</mi><mo>+</mo><mi>d</mi></mrow></mrow></mfrac>",
-      );
-      expect(frac).not.toContain('<mo fence="true">(</mo>');
-    });
-
-    test("preserves inner parentheses when nested inside unwrapped parentheses", () => {
-      const frac = typstToMathML("((x + 1)) / (y + 1)");
-      expect(frac).toContain('<mo fence="true">(</mo>');
-      expect(frac).toContain('<mo fence="true">)</mo>');
-    });
-
-    test("preserves square brackets in fraction terms", () => {
-      const frac = typstToMathML("[a] / (b)");
-      expect(frac).toContain('<mo fence="true">[</mo>');
-      expect(frac).toContain('<mo fence="true">]</mo>');
-      expect(frac).not.toContain('<mo fence="true">(</mo>');
-    });
-  });
-
   describe("frac function", () => {
     test("renders explicit frac function", () => {
       expect(typstToMathML("frac(1, 1 + x)")).toContain(

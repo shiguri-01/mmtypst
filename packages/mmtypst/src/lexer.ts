@@ -12,11 +12,14 @@ import {
 } from "./symbols.ts";
 import type { Token } from "./types.ts";
 
+const graphemes = new Intl.Segmenter(undefined, { granularity: "grapheme" });
+
 /**
  * Tokenizes a Typst math expression string into a sequence of tokens.
  */
 export function tokenize(input: string): Token[] {
   const tokens: Token[] = [];
+  const segments = graphemes.segment(input);
   const len = input.length;
   let pos = 0;
 
@@ -59,8 +62,8 @@ export function tokenize(input: string): Token[] {
       continue;
     }
 
-    // 5. Numbers (integers, decimals, and leading dot .5)
-    if (isDigit(ch) || (ch === "." && pos + 1 < len && isDigit(input[pos + 1]))) {
+    // A leading dot is its own math atom in Typst: `.5/b` is `.` then `5/b`.
+    if (isDigit(ch)) {
       const numStr = scanNumber(input, pos, len);
       pos += numStr.length;
       tokens.push({ type: "NUMBER", value: numStr, start, end: pos });
@@ -79,7 +82,8 @@ export function tokenize(input: string): Token[] {
     if (isIdentStart(ch)) {
       const ident = scanIdentifier(input, pos, len);
       pos += ident.length;
-      tokens.push({ type: "IDENT", value: ident, start, end: pos });
+      const type = segments.containing(start)!.segment.length === ident.length ? "ATOM" : "IDENT";
+      tokens.push({ type, value: ident, start, end: pos });
       continue;
     }
 
@@ -88,6 +92,18 @@ export function tokenize(input: string): Token[] {
     if (fixedType) {
       tokens.push({ type: fixedType, value: ch, start, end: pos + 1 });
       pos++;
+      continue;
+    }
+
+    if (ch === "'") {
+      do {
+        pos++;
+      } while (input[pos] === "'");
+      tokens.push({ type: "PRIMES", value: input.slice(start, pos), start, end: pos });
+      continue;
+    }
+    if (["√", "∛", "∜"].includes(ch)) {
+      tokens.push({ type: "ROOT", value: ch, start, end: ++pos });
       continue;
     }
 
@@ -104,8 +120,10 @@ export function tokenize(input: string): Token[] {
     }
 
     // 10. General operators and single characters
-    tokens.push({ type: "OPERATOR", value: ch, start, end: pos + ch.length });
-    pos += ch.length;
+    const segment = segments.containing(pos)!;
+    const atom = segment.segment.slice(pos - segment.index);
+    tokens.push({ type: "OPERATOR", value: atom, start, end: pos + atom.length });
+    pos += atom.length;
   }
 
   tokens.push({ type: "EOF", value: "", start: pos, end: pos });
@@ -113,6 +131,10 @@ export function tokenize(input: string): Token[] {
 }
 
 const FIXED_TYPES: Readonly<Record<string, Token["type"]>> = {
+  "#": "OPERATOR",
+  $: "OPERATOR",
+  "!": "OPERATOR",
+  ".": "OPERATOR",
   "(": "LPAREN",
   ")": "RPAREN",
   _: "UNDERSCORE",
@@ -130,7 +152,7 @@ function skipWhitespaceAndComments(input: string, start: number, len: number): n
     const ch = input[pos];
     // Typst math treats ordinary newlines as whitespace. Explicit line breaks
     // are represented by a backslash token and are handled below.
-    if (ch === " " || ch === "\t" || ch === "\r" || ch === "\n") {
+    if (/\p{White_Space}/u.test(ch)) {
       pos++;
       continue;
     }
@@ -173,17 +195,15 @@ function matchShorthand(input: string, pos: number): ShorthandDef | null {
 }
 
 function isDigit(ch?: string): boolean {
-  return ch !== undefined && ch >= "0" && ch <= "9";
+  return ch !== undefined && /^\p{N}$/u.test(ch);
 }
 
 function isIdentStart(ch: string): boolean {
-  return (
-    (ch >= "a" && ch <= "z") || (ch >= "A" && ch <= "Z") || (ch > "\u007F" && /\p{L}/u.test(ch))
-  );
+  return /^\p{XID_Start}$/u.test(ch);
 }
 
 function isIdentPart(ch: string): boolean {
-  return isIdentStart(ch) || isDigit(ch);
+  return ch !== "_" && /^\p{XID_Continue}$/u.test(ch);
 }
 
 function scanNumber(input: string, start: number, len: number): string {
@@ -191,10 +211,15 @@ function scanNumber(input: string, start: number, len: number): string {
   let hasDot = false;
 
   while (pos < len) {
-    const ch = input[pos];
+    const ch = String.fromCodePoint(input.codePointAt(pos)!);
     if (isDigit(ch)) {
-      pos++;
-    } else if (ch === "." && !hasDot && pos + 1 < len && isDigit(input[pos + 1])) {
+      pos += ch.length;
+    } else if (
+      ch === "." &&
+      !hasDot &&
+      pos + 1 < len &&
+      isDigit(String.fromCodePoint(input.codePointAt(pos + 1)!))
+    ) {
       hasDot = true;
       pos++;
     } else {
@@ -251,17 +276,22 @@ function scanEscape(
 
 function scanIdentifier(input: string, start: number, len: number): string {
   let pos = start;
+  let firstGraphemeLength: number | undefined;
 
   while (pos < len) {
     const ch = String.fromCodePoint(input.codePointAt(pos)!);
     if (isIdentPart(ch)) {
       pos += ch.length;
-    } else if (ch === "." && pos + 1 < len && isIdentStart(input[pos + 1])) {
+    } else if (
+      ch === "." &&
+      (firstGraphemeLength ??= graphemes.segment(input.slice(start, pos)).containing(0)!
+        .segment.length) <
+        pos - start &&
+      pos + 1 < len &&
+      isIdentStart(String.fromCodePoint(input.codePointAt(pos + 1)!))
+    ) {
       // Dotted symbol extension: phi.alt, plus.minus, etc.
-      pos += 2;
-      while (pos < len && isIdentPart(input[pos])) {
-        pos++;
-      }
+      pos++;
     } else {
       break;
     }

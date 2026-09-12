@@ -83,7 +83,7 @@ describe("symbols conversion", () => {
       expect(typstToMathML("a ⇔ b")).toContain("<mo>⇔</mo>");
     });
 
-    test("handles Unicode relation operators with binary operator precedence", () => {
+    test("renders Unicode relation atoms", () => {
       expect(typstToMathML("x ≈ y")).toContain("<mrow><mi>x</mi><mo>≈</mo><mi>y</mi></mrow>");
       expect(typstToMathML("x ∈ A")).toContain("<mrow><mi>x</mi><mo>∈</mo><mi>A</mi></mrow>");
       expect(typstToMathML("A ⊂ B")).toContain("<mrow><mi>A</mi><mo>⊂</mo><mi>B</mi></mrow>");

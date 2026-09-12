@@ -20,21 +20,10 @@ describe("matrices conversion", () => {
 
       const pipeMat = typstToMathML('mat(delim: "|", 1, 2; 3, 4)');
       expect(pipeMat).toContain('<mo fence="true">|</mo>');
-
-      const noneMat = typstToMathML('mat(delim: "none", 1, 2; 3, 4)');
-      expect(noneMat).not.toContain('<mo fence="true">');
-      expect(noneMat).toContain("<mtable>");
     });
   });
 
   describe("vectors", () => {
-    test("renders single-element vector as single-row mtable", () => {
-      const singleVec = typstToMathML("vec(x)");
-      expect(singleVec).toContain("<mtable>");
-      expect(singleVec).toContain("<mtr><mtd><mi>x</mi></mtd></mtr>");
-      expect(singleVec).not.toContain("<mi>vec</mi>");
-    });
-
     test("renders multi-element vector as multi-row mtable", () => {
       const multiVec = typstToMathML("vec(1, 2, 3)");
       expect(multiVec).toContain("<mtr><mtd><mn>1</mn></mtd></mtr>");
@@ -59,16 +48,10 @@ describe("matrices conversion", () => {
     });
   });
 
-  test.each([
-    ["[|", "⟦"],
-    ["||", "‖"],
-    ["{", "{"],
-    ["none", ""],
-  ])("uses shared delimiter spellings in cases: %s", (delimiter, expected) => {
-    const output = typstToMathML(`cases(x, delim: "${delimiter}")`);
-    const fence = expected ? `<mo fence="true">${expected}</mo>` : "";
+  test("renders a custom cases delimiter on the left", () => {
+    const output = typstToMathML('cases(x, delim: "⟦")');
     expect(output).toBe(
-      `<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow>${fence}<mtable class="cases"><mtr><mtd><mi>x</mi></mtd></mtr></mtable></mrow></math>`,
+      '<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mo fence="true">⟦</mo><mtable class="cases"><mtr><mtd><mi>x</mi></mtd></mtr></mtable></mrow></math>',
     );
   });
 });

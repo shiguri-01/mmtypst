@@ -76,7 +76,7 @@ for more about math fonts and platform support.
 
 ## Limitations
 
-`mmtypst` targets Typst 0.15.1 math syntax for standalone expressions.
+`mmtypst` targets standalone math syntax from Typst 0.15.1.
 
 - Typst code is not evaluated, including variable definitions, imports, and
   `set`/`show` rules.

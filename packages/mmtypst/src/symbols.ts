@@ -3,27 +3,12 @@
  *
  * Single Source of Truth (SSOT) for:
  * - Symbol definitions and Unicode mappings
- * - Mathematical operator precedence
  * - Delimiters and fences
  * - Shorthand replacements
  * - Recognized math functions, accents, decorations, and font variants
  */
 
-import type { Token, TokenType } from "./types.ts";
-
-export enum Precedence {
-  NONE = 0,
-  RELATION = 1, // =, !=, <, >, <=, >=, ->, =>, etc.
-  ADD = 2, // +, -
-  MUL = 3, // *, times, div
-  IMPLICIT_MUL = 4, // juxtaposition: 2x, sin x, a b
-  FRAC = 5, // /
-  PREFIX = 6, // unary -, +
-  ATTACH = 7, // _, ^
-  POSTFIX = 8, // !, '
-  CALL = 9, // f(...)
-  PRIMARY = 10,
-}
+import type { TokenType } from "./types.ts";
 
 export type DelimiterClass = "open" | "close" | "neutral";
 
@@ -92,10 +77,17 @@ export const SHORTHANDS: readonly ShorthandDef[] = [
   { pattern: "<--", replacement: "⟵", type: "OPERATOR" },
   { pattern: "<->", replacement: "↔", type: "OPERATOR" },
   { pattern: "|->", replacement: "↦", type: "OPERATOR" },
+  { pattern: ">->", replacement: "↣", type: "OPERATOR" },
+  { pattern: "->>", replacement: "↠", type: "OPERATOR" },
+  { pattern: "<-<", replacement: "↢", type: "OPERATOR" },
+  { pattern: "<<-", replacement: "↞", type: "OPERATOR" },
+  { pattern: "~~>", replacement: "⟿", type: "OPERATOR" },
+  { pattern: "<~~", replacement: "⬳", type: "OPERATOR" },
+  { pattern: "|=>", replacement: "⤇", type: "OPERATOR" },
   { pattern: "::=", replacement: "⩴", type: "OPERATOR" },
   { pattern: "<<<", replacement: "⋘", type: "OPERATOR" },
   { pattern: ">>>", replacement: "⋙", type: "OPERATOR" },
-  { pattern: "...", replacement: "…", type: "IDENT" },
+  { pattern: "...", replacement: "…", type: "ATOM" },
 
   // 2-character shorthands
   { pattern: ":=", replacement: "≔", type: "OPERATOR" },
@@ -111,18 +103,14 @@ export const SHORTHANDS: readonly ShorthandDef[] = [
   { pattern: "[|", replacement: "⟦", type: "OPEN_DELIM" },
   { pattern: "|]", replacement: "⟧", type: "CLOSE_DELIM" },
   { pattern: "||", replacement: "‖", type: "OPERATOR" },
+  { pattern: "~>", replacement: "⇝", type: "OPERATOR" },
+  { pattern: "<~", replacement: "⇜", type: "OPERATOR" },
 
   // 1-character Typst math mode operator shorthands
-  { pattern: "*", replacement: "⋅", type: "OPERATOR" },
+  { pattern: "*", replacement: "∗", type: "OPERATOR" },
   { pattern: "-", replacement: "−", type: "OPERATOR" },
+  { pattern: "~", replacement: "∼", type: "OPERATOR" },
 ];
-
-/** Delimiter shorthands in Typst */
-export const DELIMITER_SHORTHANDS: Readonly<Record<string, string>> = {
-  "[|": "⟦",
-  "|]": "⟧",
-  "||": "‖",
-};
 
 export function isOpeningDelimiter(char: string): boolean {
   return DELIMITERS[char]?.class === "open";
@@ -137,8 +125,7 @@ export function isFence(char: string): boolean {
 }
 
 export function getMatchingDelimiter(delim: string): string {
-  const resolved = DELIMITER_SHORTHANDS[delim] ?? delim;
-  return DELIMITERS[resolved]?.pair ?? resolved;
+  return DELIMITERS[delim]?.pair ?? delim;
 }
 
 /**
@@ -368,134 +355,17 @@ export const SYMBOLS: Readonly<Record<string, SymbolDef>> = {
   "bracket.r": { unicode: "]", type: "fence" },
   "bracket.l.stroked": { unicode: "⟦", type: "fence" },
   "bracket.r.stroked": { unicode: "⟧", type: "fence" },
-  "bracket.l.double": { unicode: "⟦", type: "fence" },
-  "bracket.r.double": { unicode: "⟧", type: "fence" },
-  "bracket.double.l": { unicode: "⟦", type: "fence" },
-  "bracket.double.r": { unicode: "⟧", type: "fence" },
   "bracket.t": { unicode: "⎴", type: "fence" },
   "bracket.b": { unicode: "⎵", type: "fence" },
   "paren.l": { unicode: "(", type: "fence" },
   "paren.r": { unicode: ")", type: "fence" },
   "brace.l": { unicode: "{", type: "fence" },
   "brace.r": { unicode: "}", type: "fence" },
-  "angle.l": { unicode: "⟨", type: "fence" },
-  "angle.r": { unicode: "⟩", type: "fence" },
-  "angle.l.double": { unicode: "⟪", type: "fence" },
-  "angle.r.double": { unicode: "⟫", type: "fence" },
   "floor.l": { unicode: "⌊", type: "fence" },
   "floor.r": { unicode: "⌋", type: "fence" },
   "ceil.l": { unicode: "⌈", type: "fence" },
   "ceil.r": { unicode: "⌉", type: "fence" },
 };
-
-/**
- * Additive binary operators (Precedence.ADD).
- */
-const ADD_OPERATORS: ReadonlySet<string> = new Set([
-  "+",
-  "-",
-  "−",
-  "±",
-  "∓",
-  "plus.minus",
-  "minus.plus",
-]);
-
-/**
- * Multiplicative binary operators (Precedence.MUL).
- */
-const MUL_OPERATORS: ReadonlySet<string> = new Set([
-  "*",
-  "⋅",
-  "×",
-  "÷",
-  "∗",
-  "⋆",
-  "∘",
-  "•",
-  "∙",
-  "⊕",
-  "⊗",
-  "⊙",
-  "⊖",
-  "∧",
-  "∨",
-  "times",
-  "div",
-]);
-
-/**
- * Relation operators (Precedence.RELATION).
- * Initialized with ASCII and shorthand relation operators, then augmented with
- * all Unicode characters defined with type "rel" in SYMBOLS.
- */
-const RELATION_OPERATORS = new Set<string>([
-  "=",
-  "!=",
-  ":=",
-  "::=",
-  "=:",
-  "<",
-  ">",
-  "<=",
-  ">=",
-  "<<",
-  ">>",
-  "<<<",
-  ">>>",
-  "->",
-  "<-",
-  "<->",
-  "=>",
-  "<=>",
-  "<==>",
-  "-->",
-  "<--",
-  "<-->",
-  "==>",
-  "<==",
-  "|->",
-]);
-
-for (const sym of Object.values(SYMBOLS)) {
-  if (sym.type === "rel") {
-    RELATION_OPERATORS.add(sym.unicode);
-  }
-}
-
-/**
- * Returns the binary operator precedence for a token, or Precedence.NONE if not a binary operator.
- */
-export function getBinaryPrecedence(token: Token): Precedence {
-  const val = token.value;
-
-  if (ADD_OPERATORS.has(val)) {
-    return Precedence.ADD;
-  }
-  if (MUL_OPERATORS.has(val)) {
-    return Precedence.MUL;
-  }
-  if (RELATION_OPERATORS.has(val)) {
-    return Precedence.RELATION;
-  }
-
-  if (token.type === "IDENT") {
-    const sym = SYMBOLS[val];
-    if (sym) {
-      if (sym.type === "rel") return Precedence.RELATION;
-      if (sym.type === "op") return Precedence.MUL;
-    }
-  }
-
-  return Precedence.NONE;
-}
-
-/**
- * Checks whether a token is a binary operator.
- */
-export function isBinaryOperator(token: Token): boolean {
-  return getBinaryPrecedence(token) !== Precedence.NONE;
-}
 
 /**
  * Standard named mathematical operators (typeset in upright/normal font).

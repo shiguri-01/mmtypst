@@ -2,12 +2,12 @@ import { combineFontVariant, toMathAlphanumeric } from "./math-fonts.ts";
 import { resolveAST } from "./semantic.ts";
 import {
   ACCENT_SYMBOLS,
-  DELIMITER_SHORTHANDS,
   FONT_VARIANTS,
   getMatchingDelimiter,
   isFence,
   LIMIT_OPERATORS,
   MATH_FUNCTIONS,
+  SYMBOLS,
 } from "./symbols.ts";
 import type {
   ASTNode,
@@ -97,6 +97,8 @@ export function renderNode(node: ASTNode, ctx: RenderContext): string {
       return renderTable(node, ctx);
     case "Space":
       return renderSpace(node);
+    case "LayoutMarker":
+      return "<mrow/>";
     case "Error":
       return renderError(node.message, ctx);
     default:
@@ -184,7 +186,15 @@ function renderAttach(node: AttachNode, ctx: RenderContext): string {
   const script = (value: ASTNode | undefined) => (value ? renderNode(value, childCtx) : undefined);
   let base = renderNode(node.base, { ...ctx, forceLimits: limits });
   const subscript = script(node.subscript);
-  const superscript = script(node.superscript);
+  let superscript = script(node.superscript);
+  if (node.primes) {
+    const primes = `<mo>${"′".repeat(node.primes)}</mo>`;
+    if (limits) {
+      base = `<msup>${base}${primes}</msup>`;
+    } else {
+      superscript = superscript ? `<mrow>${primes}${superscript}</mrow>` : primes;
+    }
+  }
 
   if (subscript && superscript) {
     const tag = limits ? "munderover" : "msubsup";
@@ -221,7 +231,6 @@ const FENCE_FUNCTIONS: Readonly<Record<string, readonly [open: string, close: st
   ceil: ["⌈", "⌉"],
   round: ["⌊", "⌉"],
   "bracket.stroked": ["⟦", "⟧"],
-  "bracket.double": ["⟦", "⟧"],
 };
 
 // Built-in decoration functions: overline, underline, overbrace, underbrace
@@ -311,24 +320,21 @@ function renderFunctionCall(node: FunctionCallNode, ctx: RenderContext): string 
   // Standard upright math operators: sin(x), cos(x), log(x)
   const innerArgs = args.map((a) => renderNode(a, ctx)).join("<mo>,</mo>");
   const variant = MATH_FUNCTIONS.has(name) ? ' mathvariant="normal"' : "";
-  return `<mrow><mi${variant}>${escapeText(name)}</mi><mo fence="true">(</mo>${innerArgs}<mo fence="true">)</mo></mrow>`;
+  const replacement =
+    ctx.options.symbols && Object.hasOwn(ctx.options.symbols, name)
+      ? ctx.options.symbols[name]
+      : undefined;
+  const symbol = SYMBOLS[name];
+  const callee = replacement ?? symbol?.unicode ?? name;
+  const tag =
+    symbol && ["op", "largeop", "rel", "fence", "punct"].includes(symbol.type) ? "mo" : "mi";
+  return `<mrow><${tag}${variant}>${escapeText(callee)}</${tag}><mo fence="true">(</mo>${innerArgs}<mo fence="true">)</mo></mrow>`;
 }
 
 function renderRoot(node: FunctionCallNode, ctx: RenderContext): string {
-  const args = node.args;
-  const namedArgs = node.namedArgs ?? {};
-
-  const degreeArg = namedArgs["n"] ?? namedArgs["index"] ?? (args.length > 1 ? args[0] : undefined);
-  const radicandArg = args.length > 1 ? args[1] : args[0];
-  const radicand = radicandArg ? renderNode(radicandArg, ctx) : "";
-  if (degreeArg) {
-    const degree =
-      typeof degreeArg === "string"
-        ? `<mtext>${escapeText(degreeArg)}</mtext>`
-        : renderNode(degreeArg, { ...ctx, displayStyle: false });
-    return `<mroot>${radicand}${degree}</mroot>`;
-  }
-  return `<msqrt>${radicand}</msqrt>`;
+  const degree = renderNode(node.args[0], { ...ctx, displayStyle: false });
+  const radicand = renderNode(node.args[1], ctx);
+  return `<mroot>${radicand}${degree}</mroot>`;
 }
 
 function renderBinomial(node: FunctionCallNode, ctx: RenderContext): string {
@@ -347,20 +353,20 @@ function renderAttachmentCall(node: FunctionCallNode, ctx: RenderContext): strin
   const args = node.args;
   const namedArgs = node.namedArgs ?? {};
 
-  const arg = (key: string, alias: string): ASTNode | undefined => {
-    const value = namedArgs[key] ?? namedArgs[alias];
+  const arg = (key: string): ASTNode | undefined => {
+    const value = namedArgs[key];
     return typeof value === "string" ? { type: "String", value } : value;
   };
   return renderAttach(
     {
       type: "Attach",
       base: args[0],
-      subscript: arg("b", "bottom"),
-      superscript: arg("t", "top"),
-      bottomLeft: arg("bl", "bottomLeft"),
-      topLeft: arg("tl", "topLeft"),
-      bottomRight: arg("br", "bottomRight"),
-      topRight: arg("tr", "topRight"),
+      subscript: arg("b"),
+      superscript: arg("t"),
+      bottomLeft: arg("bl"),
+      topLeft: arg("tl"),
+      bottomRight: arg("br"),
+      topRight: arg("tr"),
     },
     ctx,
   );
@@ -374,13 +380,8 @@ function renderGroup(node: GroupNode, ctx: RenderContext): string {
 }
 
 function renderMatrix(node: MatrixNode, ctx: RenderContext): string {
-  const delim = node.delimiter || "(";
-  let openFence = "";
-  let closeFence = "";
-  if (delim !== "none") {
-    openFence = DELIMITER_SHORTHANDS[delim] ?? delim;
-    closeFence = getMatchingDelimiter(openFence);
-  }
+  const openFence = node.delimiter;
+  const closeFence = getMatchingDelimiter(openFence);
 
   const rowsXml = node.rows
     .map((row) => {
@@ -390,10 +391,6 @@ function renderMatrix(node: MatrixNode, ctx: RenderContext): string {
     .join("");
 
   const tableXml = `<mtable>${rowsXml}</mtable>`;
-  if (!openFence && !closeFence) {
-    return tableXml;
-  }
-
   return `<mrow><mo fence="true">${escapeText(openFence)}</mo>${tableXml}<mo fence="true">${escapeText(closeFence)}</mo></mrow>`;
 }
 
@@ -412,8 +409,7 @@ function renderCases(node: CasesNode, ctx: RenderContext): string {
     })
     .join("");
 
-  const delim = node.delimiter ?? "{";
-  const openFence = delim === "none" ? "" : (DELIMITER_SHORTHANDS[delim] ?? delim);
+  const openFence = node.delimiter ?? "{";
   const openMo = openFence ? `<mo fence="true">${escapeText(openFence)}</mo>` : "";
 
   return `<mrow>${openMo}<mtable class="cases">${rowsXml}</mtable></mrow>`;

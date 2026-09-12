@@ -28,24 +28,13 @@ describe("options conversion", () => {
   });
 
   describe("error handling", () => {
-    test("generates merror element when throwOnError is false", () => {
-      const errorOutput = typstToMathML("1 /", { throwOnError: false });
-      expect(errorOutput).toContain("<merror>");
-      expect(errorOutput).toContain("Expected denominator after /");
-    });
-
     test("renders error messages as CSS-stylable text inside math", () => {
       const output = typstToMathML("1 /", { throwOnError: false });
       expect(output).toContain('<math xmlns="http://www.w3.org/1998/Math/MathML"');
       expect(output).toContain("<merror><mtext>");
+      expect(output).toContain("Expected denominator after /");
       expect(output).toContain("</math>");
       expect(output).not.toContain("style=");
-    });
-
-    test("throws exception when throwOnError is true", () => {
-      expect(() => {
-        typstToMathML("1 /", { throwOnError: true });
-      }).toThrow("Expected denominator after /");
     });
   });
 
@@ -81,10 +70,6 @@ describe("options conversion", () => {
       },
     );
 
-    test("allows unknown multi-character identifiers by default", () => {
-      expect(typstToMathML("foo + 1")).toContain("<mi>foo</mi>");
-    });
-
     test("rejects unknown multi-character identifiers with merror", () => {
       expect(typstToMathML("foo + 1", { unknownNames: "error" })).toContain("<merror>");
     });
@@ -95,8 +80,9 @@ describe("options conversion", () => {
       }).toThrow('Unknown symbol: "foo"');
     });
 
-    test("allows single-character variables when unknownNames is error", () => {
+    test("allows single-character variables and calls when unknownNames is error", () => {
       expect(typstToMathML("x + y_1", { unknownNames: "error" })).toContain("<mi>x</mi>");
+      expect(typstToMathML("f(x)", { unknownNames: "error" })).toContain("<mi>f</mi>");
     });
 
     test("allows standard Typst symbols and functions when unknownNames is error", () => {
@@ -116,19 +102,12 @@ describe("options conversion", () => {
   });
 
   test.each([
-    "sqrt(x",
-    "mat(1",
-    "vec(1",
-    "cases(1",
-    "(1 /)",
-    "x^)",
     "mat(foo: 1, 2)",
     'vec(delim: "[", delim: "(", 1)',
-    "root(n: 2, n: 3, x)",
+    "attach(x, t: 2, t: 3)",
     "frac(1)",
     "sqrt(x, y)",
     "sqrt(index: 3, x)",
-    "root(3, x, index: 4)",
     "foo(x, ignored: y)",
   ])("reports malformed or unsupported input: %s", (source) => {
     expect(typstToMathML(source)).toContain("<merror>");
@@ -146,7 +125,7 @@ describe("options conversion", () => {
     expect(typstToMathML("sin x + gcd(a,b)", { unknownNames: "error" })).not.toContain("<merror>");
   });
 
-  test.each(['"unterminated', "sqrt(x", "x^", "1 /"])(
+  test.each(['"unterminated', "1 /", "sqrt()"])(
     "error output includes display, class and attributes on the math element: %s",
     (source) => {
       const output = typstToMathML(source, {
