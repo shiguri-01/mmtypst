@@ -276,14 +276,17 @@ function scanEscape(
 
 function scanIdentifier(input: string, start: number, len: number): string {
   let pos = start;
+  let firstGraphemeLength: number | undefined;
 
   while (pos < len) {
     const ch = String.fromCodePoint(input.codePointAt(pos)!);
     if (isIdentPart(ch)) {
       pos += ch.length;
     } else if (
-      graphemes.segment(input.slice(start, pos)).containing(0)!.segment.length < pos - start &&
       ch === "." &&
+      (firstGraphemeLength ??= graphemes.segment(input.slice(start, pos)).containing(0)!
+        .segment.length) <
+        pos - start &&
       pos + 1 < len &&
       isIdentStart(String.fromCodePoint(input.codePointAt(pos + 1)!))
     ) {
