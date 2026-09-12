@@ -59,48 +59,6 @@ describe("options conversion", () => {
     });
   });
 
-  describe("unknownNames", () => {
-    test.each(["foo", "foo(x)"])(
-      "renders unknown names with the default and render policies: %s",
-      (source) => {
-        expect(typstToMathML(source)).toContain("<mi>foo</mi>");
-        expect(typstToMathML(source, { unknownNames: "render", throwOnError: true })).toBe(
-          typstToMathML(source),
-        );
-      },
-    );
-
-    test("rejects unknown multi-character identifiers with merror", () => {
-      expect(typstToMathML("foo + 1", { unknownNames: "error" })).toContain("<merror>");
-    });
-
-    test("throws on unknown multi-character identifiers when throwOnError is true", () => {
-      expect(() => {
-        typstToMathML("foo + 1", { unknownNames: "error", throwOnError: true });
-      }).toThrow('Unknown symbol: "foo"');
-    });
-
-    test("allows single-character variables and calls when unknownNames is error", () => {
-      expect(typstToMathML("x + y_1", { unknownNames: "error" })).toContain("<mi>x</mi>");
-      expect(typstToMathML("f(x)", { unknownNames: "error" })).toContain("<mi>f</mi>");
-    });
-
-    test("allows standard Typst symbols and functions when unknownNames is error", () => {
-      const output = typstToMathML("alpha + beta + sin x", { unknownNames: "error" });
-      expect(output).toContain("<mi>α</mi>");
-      expect(output).toContain('<mi mathvariant="normal">sin</mi>');
-    });
-
-    test("allows custom registered symbols when unknownNames is error", () => {
-      expect(
-        typstToMathML("customVar + 1", {
-          unknownNames: "error",
-          symbols: { customVar: "C" },
-        }),
-      ).toContain("<mi>C</mi>");
-    });
-  });
-
   test.each([
     "mat(foo: 1, 2)",
     'vec(delim: "[", delim: "(", 1)',
@@ -117,12 +75,9 @@ describe("options conversion", () => {
   test("custom symbols override original built-in names and preserve categories", () => {
     const output = typstToMathML("alpha times beta", {
       symbols: { alpha: "A", times: "××" },
-      unknownNames: "error",
     });
     expect(output).toContain("<mi>A</mi>");
     expect(output).toContain("<mo>××</mo>");
-    expect(typstToMathML("foo(x)", { unknownNames: "error" })).toContain("<merror>");
-    expect(typstToMathML("sin x + gcd(a,b)", { unknownNames: "error" })).not.toContain("<merror>");
   });
 
   test.each(['"unterminated', "1 /", "sqrt()"])(

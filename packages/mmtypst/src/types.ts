@@ -29,13 +29,6 @@ export interface TypstToMathMLOptions {
    * Custom symbol mapping to override or extend built-in symbols.
    */
   symbols?: Record<string, string>;
-
-  /**
-   * How to handle unknown multi-character identifiers and function names:
-   * - "render" (default): render the name as written.
-   * - "error": report an error, subject to throwOnError.
-   */
-  unknownNames?: "render" | "error";
 }
 
 /**

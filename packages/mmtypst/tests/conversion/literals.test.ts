@@ -37,6 +37,6 @@ describe("literals conversion", () => {
 
   test("renders escaped Unicode text and literal mathematical letters", () => {
     expect(typstToMathML(String.raw`"\u{03B1}"`)).toContain("<mtext>α</mtext>");
-    expect(typstToMathML("𝐀", { unknownNames: "error" })).toContain("<mi>𝐀</mi>");
+    expect(typstToMathML("𝐀")).toContain("<mi>𝐀</mi>");
   });
 });

@@ -1,4 +1,4 @@
-import { ACCENT_SYMBOLS, DELIMITERS, FONT_VARIANTS, MATH_FUNCTIONS, SYMBOLS } from "./symbols.ts";
+import { ACCENT_SYMBOLS, DELIMITERS, FONT_VARIANTS, MATH_FUNCTIONS } from "./symbols.ts";
 import type { ASTNode, FunctionCallNode, TypstToMathMLOptions } from "./types.ts";
 
 type FunctionSignature = {
@@ -50,19 +50,7 @@ export function resolveAST(node: ASTNode, options: TypstToMathMLOptions = {}): A
 
   switch (node.type) {
     case "Ident": {
-      const name = sourceName(node);
       const replacement = customSymbol(node, options);
-      const isUnknown =
-        node.isUnknown !== false &&
-        replacement === undefined &&
-        Array.from(name).length > 1 &&
-        !Object.hasOwn(SYMBOLS, name) &&
-        !MATH_FUNCTIONS.has(name);
-
-      if (options.unknownNames === "error" && isUnknown) {
-        return semanticError(node, `Unknown symbol: "${name}"`);
-      }
-
       return replacement === undefined ? node : { ...node, name: replacement };
     }
 
@@ -165,10 +153,6 @@ function resolveFunctionCall(node: FunctionCallNode, options: TypstToMathMLOptio
   const signature = Object.hasOwn(signatures, name) ? signatures[name] : undefined;
   const args = node.args.map((argument) => resolveAST(argument, options));
   const namedArgs = resolveNamedArguments(node.namedArgs, options);
-
-  if (!signature && options.unknownNames === "error" && Array.from(name).length > 1) {
-    return semanticError(node, `Unknown function: "${name}"`);
-  }
 
   if (signature) {
     const tooFew = args.length < signature.min;

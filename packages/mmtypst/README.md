@@ -39,14 +39,13 @@ const blockMathML = typstToMathML("e^(i pi) = -1", {
 
 All options are optional.
 
-| Option         | Type                     | Default     | Description                                                           |
-| -------------- | ------------------------ | ----------- | --------------------------------------------------------------------- |
-| `display`      | `"inline" \| "block"`    | `"inline"`  | Display mode.                                                         |
-| `throwOnError` | `boolean`                | `false`     | Throw on errors instead of returning a MathML `<merror>`.             |
-| `class`        | `string`                 | `undefined` | CSS class for the root `<math>` element.                              |
-| `attributes`   | `Record<string, string>` | `{}`        | Additional attributes for the root element.                           |
-| `symbols`      | `Record<string, string>` | `{}`        | Add or override symbol mappings.                                      |
-| `unknownNames` | `"render" \| "error"`    | `"render"`  | How to handle unknown multi-character identifiers and function names. |
+| Option         | Type                     | Default     | Description                                               |
+| -------------- | ------------------------ | ----------- | --------------------------------------------------------- |
+| `display`      | `"inline" \| "block"`    | `"inline"`  | Display mode.                                             |
+| `throwOnError` | `boolean`                | `false`     | Throw on errors instead of returning a MathML `<merror>`. |
+| `class`        | `string`                 | `undefined` | CSS class for the root `<math>` element.                  |
+| `attributes`   | `Record<string, string>` | `{}`        | Additional attributes for the root element.               |
+| `symbols`      | `Record<string, string>` | `{}`        | Add or override symbol mappings.                          |
 
 The lower-level `tokenize`, `parse`, and `generateMathML` functions are also exported.
 
