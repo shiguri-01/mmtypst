@@ -1,8 +1,22 @@
 import { describe, expect, test } from "vite-plus/test";
 
-import { typstToMathML } from "../../src/index.ts";
+import { extractTypstMath, typstToMathML } from "../../src/index.ts";
 
 describe("options conversion", () => {
+  describe("extractTypstMath", () => {
+    test("extracts inline math", () => {
+      expect(extractTypstMath(" $x + y$ ")).toEqual({ body: "x + y", display: "inline" });
+    });
+
+    test("extracts block math from delimiter-adjacent whitespace", () => {
+      expect(extractTypstMath("\n  $ x + y $\n")).toEqual({ body: "x + y", display: "block" });
+    });
+
+    test("requires dollar delimiters", () => {
+      expect(() => extractTypstMath("x + y")).toThrow(RangeError);
+    });
+  });
+
   describe("display", () => {
     test("defaults single-line expressions to inline", () => {
       expect(typstToMathML("x + y = z")).toContain('display="inline"');

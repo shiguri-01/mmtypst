@@ -35,6 +35,18 @@ const blockMathML = typstToMathML("e^(i pi) = -1", {
 });
 ```
 
+If your input includes Typst's `$` delimiters, use `extractTypstMath`. It
+removes surrounding indentation and returns the trimmed expression with the
+display mode inferred from Typst's delimiter-adjacent whitespace:
+
+```ts
+import { extractTypstMath, typstToMathML } from "mmtypst";
+
+const { body, display } = extractTypstMath("$ x + y $");
+const mathml = typstToMathML(body, { display });
+// display is "block"
+```
+
 ### Options
 
 All options are optional.
