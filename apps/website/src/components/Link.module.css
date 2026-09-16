@@ -1,0 +1,26 @@
+.link {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--color-decoration);
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+
+  transition: text-decoration-color var(--duration);
+}
+
+.external::after {
+  content: "↗";
+  font-size: 0.8em;
+  font-weight: 500;
+
+  color: var(--color-decoration);
+  transition: color var(--duration);
+}
+
+.link:hover {
+  text-decoration-color: currentColor;
+}
+
+.external:hover::after {
+  color: inherit;
+}

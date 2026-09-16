@@ -1,0 +1,129 @@
+.playground {
+  container-type: inline-size;
+  display: grid;
+  grid-template-areas: "editor preview";
+  grid-template-columns: minmax(0, 4fr) minmax(0, 3fr);
+
+  min-block-size: var(--space-8);
+
+  gap: var(--space-3);
+}
+
+.editor {
+  grid-area: editor;
+  min-inline-size: 0;
+
+  background: var(--color-surface);
+  margin-block: var(--space-1);
+  margin-inline: calc(var(--space-1) * 1.5);
+  padding-block: calc(var(--space-1) * 1.5);
+  padding-inline: var(--space-2);
+  border-radius: var(--radius);
+
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: var(--space-0);
+
+  &:has(textarea:focus-visible) {
+    outline: 2px solid;
+  }
+}
+
+.textarea {
+  display: block;
+  inline-size: stretch;
+  min-inline-size: 0;
+  min-block-size: stretch;
+
+  border: none;
+  color: var(--color-primary);
+  background: transparent;
+  padding: var(--space-0);
+
+  font-family: var(--mono);
+  font-size: var(--text-0);
+  tab-size: 2;
+  resize: vertical;
+
+  &:focus-visible {
+    outline: none;
+  }
+
+  &::placeholder {
+    color: var(--color-muted);
+  }
+}
+
+.examples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-0);
+}
+
+.exampleButton {
+  font-size: var(--text--1);
+  padding-block: var(--space-0);
+  padding-inline: calc(var(--space-0) * 1.5);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-muted);
+  background: transparent;
+  cursor: pointer;
+
+  transition: color var(--duration);
+
+  &:hover,
+  &[aria-pressed="true"] {
+    color: var(--color-text);
+  }
+}
+
+.preview {
+  grid-area: preview;
+  min-inline-size: 0;
+  overflow: auto;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  place-items: safe center;
+}
+
+.math {
+  inline-size: max-content;
+
+  math {
+    font-family: var(--math);
+    font-size: 2.2rem;
+  }
+}
+
+.error {
+  color: var(--color-error);
+}
+
+@container (inline-size < 48rem) {
+  .playground {
+    grid-template-areas: "preview" "editor";
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: var(--space-7) 1fr;
+
+    min-block-size: auto;
+
+    gap: var(--space-1);
+  }
+
+  .editor {
+    min-block-size: var(--space-5);
+  }
+}
+
+@container (inline-size < 32rem) {
+  .editor {
+    min-block-size: var(--space-7);
+    margin: 0;
+  }
+
+  .exampleButton {
+    font-size: var(--text-0);
+  }
+}
