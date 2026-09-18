@@ -16,6 +16,7 @@ catalog:
   vite: npm:@voidzero-dev/vite-plus-core@0.3.0
   vite-plugin-solid: ^2.11.14
   vite-plus: 0.3.0
+  wrangler: ^4.133.0
 overrides:
   vite@*: "catalog:"
 peerDependencyRules:
@@ -27,3 +28,6 @@ minimumReleaseAgeExclude:
   - solid-js
   - "@solidjs/*"
   - eslint-plugin-solid@0.18.0
+allowBuilds:
+  esbuild: true
+  workerd: true
