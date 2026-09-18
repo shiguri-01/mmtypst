@@ -38,6 +38,18 @@ Install dependencies:
 vp install
 ```
 
+Start the Solid website and playground:
+
+```bash
+vp run dev
+```
+
+Build the static site to `apps/website/dist`:
+
+```bash
+vp run website#build
+```
+
 Apply formatting and lint fixes:
 
 ```bash

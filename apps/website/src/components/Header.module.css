@@ -1,0 +1,31 @@
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-0);
+  min-block-size: var(--space-5);
+  font-size: var(--text--1);
+}
+
+.wordmark {
+  font-size: var(--text-1);
+  font-weight: 500;
+}
+
+.github {
+  text-decoration: none;
+  text-decoration-color: currentColor;
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &::after {
+    content: "↗";
+    font-size: 0.8em;
+    font-weight: 500;
+  }
+}

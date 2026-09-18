@@ -1,0 +1,139 @@
+.marker {
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  line-height: 0;
+}
+
+.reference {
+  padding-inline: 0.2em;
+  color: var(--color-decoration);
+  transition: color var(--duration);
+
+  &:hover {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+
+.backlink {
+  padding-inline-start: 0.2em;
+  font-weight: 500;
+  color: var(--color-decoration);
+  transition: color var(--duration);
+
+  &::after {
+    content: "↩";
+    font-size: 0.8em;
+  }
+
+  &:hover {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+
+.notes {
+  display: grid;
+  grid-template-columns: var(--space-7) minmax(0, 1fr);
+  gap: var(--space-3);
+
+  padding-block: var(--space-3);
+  border-block-start: 1px solid var(--color-border);
+  color: var(--color-secondary);
+}
+
+.heading {
+  color: var(--color-primary);
+  font-size: var(--text--1);
+  font-weight: 500;
+}
+
+.list {
+  margin: 0;
+  padding-inline-start: 1.5em;
+
+  font-size: var(--text-0);
+  line-height: var(--space-3);
+}
+
+.note {
+  padding-inline-start: 0.5em;
+
+  --note-gap: var(--space-1);
+  margin-block-end: var(--note-gap);
+
+  &:last-of-type {
+    margin-block-end: 0;
+  }
+}
+
+.note::marker {
+  content: "[" counter(list-item) "]";
+  color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.8em;
+  font-weight: 500;
+}
+
+@container (inline-size < 40rem) {
+  .notes {
+    display: block;
+    padding-block-start: var(--space-3);
+    padding-block-end: 0;
+    margin-block-end: var(--space-4);
+  }
+
+  .heading {
+    font-size: var(--text-0);
+    font-weight: 500;
+    margin-block-end: var(--space-2);
+  }
+}
+
+/* sidenote */
+/* main 56rem + side 20rem*2 = 96rem  */
+@media screen and (min-width: 96rem) {
+  .notes {
+    display: block;
+    padding: 0;
+    border: none;
+  }
+
+  /* visually hidden */
+  .heading {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .note {
+    --note-gap: var(--space-2);
+
+    position: absolute;
+    position-anchor: var(--reference-anchor-name);
+
+    --note-offset: var(--space-4);
+    --outer-space: var(--space-4);
+    --max-width: var(--space-9);
+
+    /* x position */
+    inset-inline-start: calc(anchor(--main-content end) + var(--note-offset));
+
+    inline-size: min(
+      var(--max-width),
+      calc((100vw - 100%) / 2 - var(--note-offset) - var(--outer-space))
+    );
+
+    /* y position */
+    --prev-note-bottom: anchor(var(--previous-note-anchor-name) bottom);
+    margin-block-end: 0;
+    top: max(anchor(top), calc(var(--prev-note-bottom) + var(--note-gap)));
+
+    &:first-of-type {
+      top: anchor(top);
+    }
+  }
+}
