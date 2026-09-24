@@ -38,16 +38,10 @@ Install dependencies:
 vp install
 ```
 
-Start the Astro website and Solid playground:
+Start the playground site:
 
 ```bash
-vp run dev
-```
-
-Build the pre-rendered static site to `apps/website/dist`:
-
-```bash
-vp run website#build
+vpr dev
 ```
 
 Apply formatting and lint fixes:
