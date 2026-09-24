@@ -42,7 +42,9 @@ export function Playground() {
           autocapitalize="off"
           autocorrect="off"
           class={styles.textarea}
-        />
+        >
+          {examples[0].source}
+        </textarea>
         <div class={styles.examples}>
           <For each={examples}>
             {(example) => {
