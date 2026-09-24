@@ -25,12 +25,13 @@ import type {
   SpaceNode,
   StringNode,
   TableNode,
+  TypstToMathMLBodyOptions,
   TypstToMathMLOptions,
   UnaryOpNode,
 } from "./types.ts";
 
 export interface RenderContext {
-  readonly options: TypstToMathMLOptions;
+  readonly options: TypstToMathMLBodyOptions;
   readonly displayStyle: boolean;
   readonly forceLimits?: boolean;
   readonly fontVariant?: string;
@@ -40,14 +41,8 @@ export interface RenderContext {
  * Generates MathML XML string from a parsed AST.
  */
 export function generateMathML(node: ASTNode, options: TypstToMathMLOptions = {}): string {
-  node = resolveAST(node, options);
   const display = options.display ?? "inline";
-  const ctx: RenderContext = {
-    options,
-    displayStyle: display === "block",
-  };
-
-  const innerMathML = renderNode(node, ctx);
+  const innerMathML = generateMathMLBody(node, options);
 
   const attrs: string[] = ['xmlns="http://www.w3.org/1998/Math/MathML"'];
   attrs.push(`display="${display}"`);
@@ -63,6 +58,16 @@ export function generateMathML(node: ASTNode, options: TypstToMathMLOptions = {}
   }
 
   return `<math ${attrs.join(" ")}>${innerMathML}</math>`;
+}
+
+/** Generates the MathML content for a caller-provided `<math>` element. */
+export function generateMathMLBody(node: ASTNode, options: TypstToMathMLBodyOptions = {}): string {
+  const resolved = resolveAST(node, options);
+  const ctx: RenderContext = {
+    options,
+    displayStyle: (options.display ?? "inline") === "block",
+  };
+  return renderNode(resolved, ctx);
 }
 
 export function renderNode(node: ASTNode, ctx: RenderContext): string {

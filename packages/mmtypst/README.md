@@ -47,6 +47,10 @@ const mathml = typstToMathML(body, { display });
 // display is "block"
 ```
 
+If your framework owns the `<math>` element, `typstToMathMLBody` returns only
+its contents. It accepts `display`, `throwOnError`, and `symbols`; set root
+attributes on `<math>` and use the same `display` value for both.
+
 ### Options
 
 All options are optional.
@@ -59,7 +63,8 @@ All options are optional.
 | `attributes`   | `Record<string, string>` | `{}`        | Additional attributes for the root element.               |
 | `symbols`      | `Record<string, string>` | `{}`        | Add or override symbol mappings.                          |
 
-The lower-level `tokenize`, `parse`, and `generateMathML` functions are also exported.
+The lower-level `tokenize`, `parse`, `generateMathML`, and `generateMathMLBody`
+functions are also exported.
 
 ## Fonts
 

@@ -31,6 +31,12 @@ export interface TypstToMathMLOptions {
   symbols?: Record<string, string>;
 }
 
+/** Options for MathML content rendered inside a caller-provided `<math>` element. */
+export type TypstToMathMLBodyOptions = Pick<
+  TypstToMathMLOptions,
+  "display" | "throwOnError" | "symbols"
+>;
+
 /**
  * Token types emitted by the lexer.
  */

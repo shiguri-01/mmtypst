@@ -1,12 +1,12 @@
-import { generateMathML } from "./generator.ts";
+import { generateMathML, generateMathMLBody } from "./generator.ts";
 import { tokenize } from "./lexer.ts";
 import { parse } from "./parser.ts";
-import type { TypstToMathMLOptions } from "./types.ts";
+import type { ASTNode, TypstToMathMLBodyOptions, TypstToMathMLOptions } from "./types.ts";
 
 export * from "./types.ts";
 export { tokenize } from "./lexer.ts";
 export { parse } from "./parser.ts";
-export { generateMathML } from "./generator.ts";
+export { generateMathML, generateMathMLBody } from "./generator.ts";
 
 /**
  * Extracts a `$`-delimited Typst equation and its display mode.
@@ -38,17 +38,30 @@ export function extractTypstMath(input: string): { body: string; display: "inlin
  * @returns MathML string.
  */
 export function typstToMathML(input: string, options: TypstToMathMLOptions = {}): string {
+  return convert(input, options, (ast) => generateMathML(ast, options));
+}
+
+/** Converts Typst math syntax to content for a caller-provided `<math>` element. */
+export function typstToMathMLBody(input: string, options: TypstToMathMLBodyOptions = {}): string {
+  return convert(input, options, (ast) => generateMathMLBody(ast, options));
+}
+
+function convert(
+  input: string,
+  options: TypstToMathMLBodyOptions,
+  generate: (ast: ASTNode) => string,
+): string {
   try {
     const tokens = tokenize(input);
     const ast = parse(tokens);
-    return generateMathML(ast, options);
+    return generate(ast);
   } catch (error: unknown) {
     if (options.throwOnError) {
       throw error;
     }
-    return generateMathML(
-      { type: "Error", message: error instanceof Error ? error.message : String(error) },
-      options,
-    );
+    return generate({
+      type: "Error",
+      message: error instanceof Error ? error.message : String(error),
+    });
   }
 }

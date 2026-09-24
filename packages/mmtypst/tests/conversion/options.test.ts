@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test";
 
-import { extractTypstMath, typstToMathML } from "../../src/index.ts";
+import { extractTypstMath, typstToMathML, typstToMathMLBody } from "../../src/index.ts";
 
 describe("options conversion", () => {
   describe("extractTypstMath", () => {
@@ -27,6 +27,24 @@ describe("options conversion", () => {
     expect(typstToMathML("x + 1")).toBe(
       '<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>x</mi><mo>+</mo><mn>1</mn></mrow></math>',
     );
+  });
+
+  describe("MathML body", () => {
+    test("returns the same content as the complete math element", () => {
+      expect(typstToMathMLBody("x + 1")).toBe("<mrow><mi>x</mi><mo>+</mo><mn>1</mn></mrow>");
+      expect(typstToMathML("x + 1")).toContain(`>${typstToMathMLBody("x + 1")}</math>`);
+    });
+
+    test("uses display mode when placing limits", () => {
+      expect(typstToMathMLBody("sum_0^n")).toContain("<msubsup>");
+      expect(typstToMathMLBody("sum_0^n", { display: "block" })).toContain("<munderover>");
+    });
+
+    test("supports custom symbols and the same error behavior", () => {
+      expect(typstToMathMLBody("alpha", { symbols: { alpha: "A" } })).toBe("<mi>A</mi>");
+      expect(typstToMathMLBody("1 /")).toContain("<merror><mtext>");
+      expect(() => typstToMathMLBody("1 /", { throwOnError: true })).toThrow();
+    });
   });
 
   describe("error handling", () => {
