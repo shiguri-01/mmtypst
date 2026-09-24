@@ -24,10 +24,6 @@ peerDependencyRules:
     - vite
   allowedVersions:
     vite: "*"
-minimumReleaseAgeExclude:
-  - solid-js
-  - "@solidjs/*"
-  - eslint-plugin-solid@0.18.0
 allowBuilds:
   esbuild: true
   workerd: true
