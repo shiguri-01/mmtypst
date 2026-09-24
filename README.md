@@ -41,6 +41,17 @@ import { Math } from "@mmtypst/react";
 <Math source="x^2 + y^2 = z^2" display="block" />;
 ```
 
+## Solid
+
+The [`@mmtypst/solid`](packages/solid/README.md) package provides the same
+`<Math />` API for Solid, with reactive updates and SSR:
+
+```tsx
+import { Math } from "@mmtypst/solid";
+
+<Math source="x^2 + y^2 = z^2" display="block" />;
+```
+
 ## Development
 
 Install dependencies:

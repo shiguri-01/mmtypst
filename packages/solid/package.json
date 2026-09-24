@@ -1,0 +1,66 @@
+{
+  "name": "@mmtypst/solid",
+  "version": "0.1.0",
+  "description": "Solid component for rendering Typst math as MathML.",
+  "keywords": [
+    "math",
+    "mathml",
+    "solid",
+    "typst"
+  ],
+  "homepage": "https://github.com/shiguri-01/mmtypst#readme",
+  "bugs": {
+    "url": "https://github.com/shiguri-01/mmtypst/issues"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "shiguri",
+    "url": "https://github.com/shiguri-01"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shiguri-01/mmtypst.git",
+    "directory": "packages/solid"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "types": "./dist/browser/index.d.mts",
+  "exports": {
+    ".": {
+      "types": "./dist/browser/index.d.mts",
+      "worker": "./dist/server/index.mjs",
+      "deno": "./dist/server/index.mjs",
+      "node": "./dist/server/index.mjs",
+      "default": "./dist/browser/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vp pack",
+    "test": "vp pack && node --test tests/server-check.mjs && vp test --run",
+    "check": "vp check",
+    "prepublishOnly": "vp run build"
+  },
+  "dependencies": {
+    "mmtypst": "workspace:~"
+  },
+  "devDependencies": {
+    "@babel/core": "catalog:",
+    "@babel/preset-typescript": "catalog:",
+    "@rolldown/plugin-babel": "catalog:",
+    "babel-preset-solid": "catalog:",
+    "solid-js": "catalog:",
+    "typescript": "^7.0.2",
+    "vite": "catalog:",
+    "vite-plugin-solid": "catalog:",
+    "vite-plus": "catalog:"
+  },
+  "peerDependencies": {
+    "solid-js": "^1.9.0"
+  }
+}
