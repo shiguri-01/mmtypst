@@ -4,5 +4,8 @@ import styles from "./Header.module.css";
 
 <header class={styles.header}>
   <h1 class={styles.wordmark}>mmtypst</h1>
-  <a class={styles.github} href="https://github.com/shiguri-01/mmtypst">GitHub</a>
+  <nav class={styles.links} aria-label="Project links">
+    <a class={styles.external} href="https://www.npmjs.com/package/mmtypst">npm</a>
+    <a class={styles.external} href="https://github.com/shiguri-01/mmtypst">GitHub</a>
+  </nav>
 </header>
