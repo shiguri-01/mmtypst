@@ -26,14 +26,14 @@
     "dist"
   ],
   "type": "module",
-  "types": "./dist/browser/index.d.mts",
+  "types": "./dist/browser/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/browser/index.d.mts",
-      "worker": "./dist/server/index.mjs",
-      "deno": "./dist/server/index.mjs",
-      "node": "./dist/server/index.mjs",
-      "default": "./dist/browser/index.mjs"
+      "types": "./dist/browser/index.d.ts",
+      "worker": "./dist/server/index.js",
+      "deno": "./dist/server/index.js",
+      "node": "./dist/server/index.js",
+      "default": "./dist/browser/index.js"
     },
     "./package.json": "./package.json"
   },
@@ -50,12 +50,11 @@
     "mmtypst": "workspace:~"
   },
   "devDependencies": {
-    "@babel/core": "catalog:",
-    "@babel/preset-typescript": "catalog:",
-    "@rolldown/plugin-babel": "catalog:",
-    "babel-preset-solid": "catalog:",
+    "@solidjs/testing-library": "catalog:",
+    "jsdom": "catalog:",
     "solid-js": "catalog:",
     "typescript": "^7.0.2",
+    "unplugin-solid": "catalog:",
     "vite": "catalog:",
     "vite-plugin-solid": "catalog:",
     "vite-plus": "catalog:"

@@ -1,24 +1,16 @@
-import babel from "@rolldown/plugin-babel";
-import solid from "vite-plugin-solid";
+import solid from "unplugin-solid/rolldown";
+import viteSolid from "vite-plugin-solid";
 import { defineConfig } from "vite-plus";
 
-function solidBabel(generate: "dom" | "ssr") {
-  return babel({
-    presets: [
-      ["@babel/preset-typescript", { isTSX: true, allExtensions: true }],
-      ["babel-preset-solid", { generate, hydratable: true }],
-    ],
-  });
-}
-
 export default defineConfig({
-  plugins: [solid()],
+  plugins: [viteSolid()],
   pack: [
     {
       name: "browser",
       entry: ["src/index.tsx"],
       outDir: "dist/browser",
-      plugins: [solidBabel("dom")],
+      platform: "neutral",
+      plugins: [solid({ solid: { hydratable: true } })],
       dts: { generator: "tsgo" },
       exports: false,
     },
@@ -26,7 +18,8 @@ export default defineConfig({
       name: "server",
       entry: ["src/index.tsx"],
       outDir: "dist/server",
-      plugins: [solidBabel("ssr")],
+      platform: "neutral",
+      plugins: [solid({ ssr: true })],
       dts: { generator: "tsgo" },
       exports: false,
     },
