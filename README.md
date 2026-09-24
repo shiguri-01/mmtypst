@@ -38,13 +38,13 @@ Install dependencies:
 vp install
 ```
 
-Start the Solid website and playground:
+Start the Astro website and Solid playground:
 
 ```bash
 vp run dev
 ```
 
-Build the static site to `apps/website/dist`:
+Build the pre-rendered static site to `apps/website/dist`:
 
 ```bash
 vp run website#build

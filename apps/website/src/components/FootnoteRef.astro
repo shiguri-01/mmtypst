@@ -1,0 +1,21 @@
+---
+import styles from "./Footnote.module.css";
+
+interface Props {
+  id: string;
+  number: number;
+}
+
+const { id, number } = Astro.props;
+---
+
+<sup class={styles.marker}>
+  <a
+    class={styles.reference}
+    href={`#footnote-${id}`}
+    id={`footnote-ref-${id}`}
+    role="doc-noteref"
+    aria-label={`Note ${number}`}
+    style={`anchor-name: --footnote-ref-${id}`}
+  >[{number}]</a>
+</sup>
