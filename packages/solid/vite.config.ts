@@ -3,7 +3,10 @@ import viteSolid from "vite-plugin-solid";
 import { defineConfig } from "vite-plus";
 
 export default defineConfig({
-  plugins: [viteSolid()],
+  plugins: [viteSolid({ hot: false })],
+  test: {
+    include: ["tests/browser.test.tsx"],
+  },
   pack: [
     {
       name: "browser",

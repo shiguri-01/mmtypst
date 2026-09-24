@@ -42,7 +42,7 @@
   },
   "scripts": {
     "build": "vp pack",
-    "test": "vp pack && node --test tests/server-check.mjs && vp test --run",
+    "test": "vp test --run && vp test --run --config vite.server.config.ts",
     "check": "vp check",
     "prepublishOnly": "vp run build"
   },

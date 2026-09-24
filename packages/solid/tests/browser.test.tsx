@@ -3,7 +3,7 @@ import { render } from "@solidjs/testing-library";
 import { createSignal } from "solid-js";
 import { describe, expect, test } from "vite-plus/test";
 
-import { Math } from "../dist/browser/index.js";
+import { Math } from "../src/index.tsx";
 
 describe("Math browser", () => {
   test("renders a MathML element and updates when the source changes", () => {
