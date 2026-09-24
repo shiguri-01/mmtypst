@@ -30,6 +30,17 @@ document.querySelector(".equation")!.innerHTML = mathml;
 For options, font setup, supported syntax, and limitations, see the
 [package README](packages/mmtypst/README.md).
 
+## React
+
+The [`@mmtypst/react`](packages/react/README.md) package provides a `<Math />`
+component that renders MathML in React, including SSR:
+
+```tsx
+import { Math } from "@mmtypst/react";
+
+<Math source="x^2 + y^2 = z^2" display="block" />;
+```
+
 ## Development
 
 Install dependencies:
