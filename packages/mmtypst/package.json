@@ -1,6 +1,6 @@
 {
   "name": "mmtypst",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Parse Typst math expressions and output MathML for browsers and servers.",
   "keywords": [
     "math",
