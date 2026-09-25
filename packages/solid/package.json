@@ -44,13 +44,15 @@
     "build": "vp pack",
     "test": "vp test --run && vp test --run --config vite.server.config.ts",
     "check": "vp check",
-    "prepublishOnly": "vp run build"
+    "prepublishOnly": "vp run build",
+    "bump": "bumpp"
   },
   "dependencies": {
     "mmtypst": "workspace:~"
   },
   "devDependencies": {
     "@solidjs/testing-library": "catalog:",
+    "bumpp": "^11.1.0",
     "jsdom": "catalog:",
     "solid-js": "catalog:",
     "typescript": "^7.0.2",

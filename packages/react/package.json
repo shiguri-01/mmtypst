@@ -38,7 +38,8 @@
     "build": "vp pack",
     "test": "vp test --run",
     "check": "vp check",
-    "prepublishOnly": "vp run build"
+    "prepublishOnly": "vp run build",
+    "bump": "bumpp"
   },
   "dependencies": {
     "mmtypst": "workspace:~"
@@ -46,6 +47,7 @@
   "devDependencies": {
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "bumpp": "^11.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "typescript": "^7.0.2",
