@@ -1,4 +1,4 @@
-import { typstToMathML } from "mmtypst";
+import { renderMathML } from "mmtypst";
 import { createMemo, createSignal, For, Show } from "solid-js";
 
 import styles from "./Playground.module.css";
@@ -18,7 +18,7 @@ export function Playground() {
     if (!input) return { mathml: "", error: "" };
 
     try {
-      const body = typstToMathML(input, { display: "block", throwOnError: true });
+      const body = renderMathML(input, { display: "block", throwOnError: true });
       return {
         mathml: body,
         error: "",

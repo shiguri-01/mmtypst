@@ -1,7 +1,7 @@
 /**
- * Options for typstToMathML conversion.
+ * Options for renderMathML conversion.
  */
-export interface TypstToMathMLOptions {
+export interface RenderMathMLOptions {
   /**
    * Display mode:
    * - "inline" (default): `<math display="inline">`
@@ -32,8 +32,8 @@ export interface TypstToMathMLOptions {
 }
 
 /** Options for MathML content rendered inside a caller-provided `<math>` element. */
-export type TypstToMathMLBodyOptions = Pick<
-  TypstToMathMLOptions,
+export type RenderMathMLBodyOptions = Pick<
+  RenderMathMLOptions,
   "display" | "throwOnError" | "symbols"
 >;
 

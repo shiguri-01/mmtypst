@@ -20,9 +20,9 @@ result is a complete `<math>` element ready for the DOM or server-rendered
 HTML.
 
 ```ts
-import { typstToMathML } from "mmtypst";
+import { renderMathML } from "mmtypst";
 
-const mathml = typstToMathML("x = (-b plus.minus sqrt(b^2 - 4 a c)) / (2 a)");
+const mathml = renderMathML("x = (-b plus.minus sqrt(b^2 - 4 a c)) / (2 a)");
 
 document.querySelector(".equation")!.innerHTML = mathml;
 ```

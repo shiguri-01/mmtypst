@@ -25,13 +25,13 @@ import type {
   SpaceNode,
   StringNode,
   TableNode,
-  TypstToMathMLBodyOptions,
-  TypstToMathMLOptions,
+  RenderMathMLBodyOptions,
+  RenderMathMLOptions,
   UnaryOpNode,
 } from "./types.ts";
 
 export interface RenderContext {
-  readonly options: TypstToMathMLBodyOptions;
+  readonly options: RenderMathMLBodyOptions;
   readonly displayStyle: boolean;
   readonly forceLimits?: boolean;
   readonly fontVariant?: string;
@@ -40,7 +40,7 @@ export interface RenderContext {
 /**
  * Generates MathML XML string from a parsed AST.
  */
-export function generateMathML(node: ASTNode, options: TypstToMathMLOptions = {}): string {
+export function generateMathML(node: ASTNode, options: RenderMathMLOptions = {}): string {
   const display = options.display ?? "inline";
   const innerMathML = generateMathMLBody(node, options);
 
@@ -61,7 +61,7 @@ export function generateMathML(node: ASTNode, options: TypstToMathMLOptions = {}
 }
 
 /** Generates the MathML content for a caller-provided `<math>` element. */
-export function generateMathMLBody(node: ASTNode, options: TypstToMathMLBodyOptions = {}): string {
+export function generateMathMLBody(node: ASTNode, options: RenderMathMLBodyOptions = {}): string {
   const resolved = resolveAST(node, options);
   const ctx: RenderContext = {
     options,

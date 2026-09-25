@@ -14,14 +14,14 @@ npm install mmtypst
 
 ## Usage
 
-Pass a Typst math expression to `typstToMathML` without the surrounding `$`
+Pass a Typst math expression to `renderMathML` without the surrounding `$`
 delimiters. It returns a complete `<math>` element as a string, ready to insert
 into the DOM or include in server-rendered HTML.
 
 ```ts
-import { typstToMathML } from "mmtypst";
+import { renderMathML } from "mmtypst";
 
-const mathml = typstToMathML("x = (-b plus.minus sqrt(b^2 - 4 a c)) / (2 a)");
+const mathml = renderMathML("x = (-b plus.minus sqrt(b^2 - 4 a c)) / (2 a)");
 
 document.querySelector(".equation")!.innerHTML = mathml;
 ```
@@ -30,7 +30,7 @@ Expressions render inline by default. Use `display: "block"` to display an
 equation on its own line:
 
 ```ts
-const blockMathML = typstToMathML("e^(i pi) = -1", {
+const blockMathML = renderMathML("e^(i pi) = -1", {
   display: "block",
 });
 ```
@@ -40,14 +40,14 @@ removes surrounding indentation and returns the trimmed expression with the
 display mode inferred from Typst's delimiter-adjacent whitespace:
 
 ```ts
-import { extractTypstMath, typstToMathML } from "mmtypst";
+import { extractTypstMath, renderMathML } from "mmtypst";
 
 const { body, display } = extractTypstMath("$ x + y $");
-const mathml = typstToMathML(body, { display });
+const mathml = renderMathML(body, { display });
 // display is "block"
 ```
 
-If your framework owns the `<math>` element, `typstToMathMLBody` returns only
+If your framework owns the `<math>` element, `renderMathMLBody` returns only
 its contents. It accepts `display`, `throwOnError`, and `symbols`; set root
 attributes on `<math>` and use the same `display` value for both.
 

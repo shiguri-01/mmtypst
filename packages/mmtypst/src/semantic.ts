@@ -1,5 +1,5 @@
 import { ACCENT_SYMBOLS, DELIMITERS, FONT_VARIANTS, MATH_FUNCTIONS } from "./symbols.ts";
-import type { ASTNode, FunctionCallNode, TypstToMathMLOptions } from "./types.ts";
+import type { ASTNode, FunctionCallNode, RenderMathMLOptions } from "./types.ts";
 
 type FunctionSignature = {
   min: number;
@@ -45,7 +45,7 @@ for (const name of MATH_FUNCTIONS) {
 
 export const FUNCTION_SIGNATURES: Readonly<Record<string, FunctionSignature>> = signatures;
 
-export function resolveAST(node: ASTNode, options: TypstToMathMLOptions = {}): ASTNode {
+export function resolveAST(node: ASTNode, options: RenderMathMLOptions = {}): ASTNode {
   const resolveChild = (child: ASTNode) => resolveAST(child, options);
 
   switch (node.type) {
@@ -148,7 +148,7 @@ export function resolveAST(node: ASTNode, options: TypstToMathMLOptions = {}): A
   }
 }
 
-function resolveFunctionCall(node: FunctionCallNode, options: TypstToMathMLOptions): ASTNode {
+function resolveFunctionCall(node: FunctionCallNode, options: RenderMathMLOptions): ASTNode {
   const name = sourceName(node);
   const signature = Object.hasOwn(signatures, name) ? signatures[name] : undefined;
   const args = node.args.map((argument) => resolveAST(argument, options));
@@ -172,7 +172,7 @@ function resolveFunctionCall(node: FunctionCallNode, options: TypstToMathMLOptio
 
 function resolveNamedArguments(
   namedArgs: FunctionCallNode["namedArgs"],
-  options: TypstToMathMLOptions,
+  options: RenderMathMLOptions,
 ): FunctionCallNode["namedArgs"] {
   if (!namedArgs) {
     return undefined;
@@ -195,7 +195,7 @@ function sourceName(node: NamedNode): string {
   return node.sourceName ?? node.name ?? node.operator ?? "";
 }
 
-function customSymbol(node: NamedNode, options: TypstToMathMLOptions): string | undefined {
+function customSymbol(node: NamedNode, options: RenderMathMLOptions): string | undefined {
   const name = sourceName(node);
   if (Object.prototype.hasOwnProperty.call(options.symbols ?? {}, name)) {
     return options.symbols?.[name];

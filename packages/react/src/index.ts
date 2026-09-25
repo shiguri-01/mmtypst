@@ -1,12 +1,12 @@
-import { typstToMathMLBody } from "mmtypst";
-import type { TypstToMathMLBodyOptions } from "mmtypst";
+import { renderMathMLBody } from "mmtypst";
+import type { RenderMathMLBodyOptions } from "mmtypst";
 import { createElement } from "react";
 import type { HTMLAttributes, ReactElement, Ref } from "react";
 
 export interface MathProps
   extends
     Omit<HTMLAttributes<MathMLElement>, "children" | "dangerouslySetInnerHTML" | "display">,
-    TypstToMathMLBodyOptions {
+    RenderMathMLBodyOptions {
   /** Typst math expression without its surrounding `$` delimiters. */
   source: string;
   /** Ref to the rendered MathML element. */
@@ -23,7 +23,7 @@ export function Math({
   ...mathProps
 }: MathProps): ReactElement {
   const markup = {
-    __html: typstToMathMLBody(source, { display, throwOnError, symbols }),
+    __html: renderMathMLBody(source, { display, throwOnError, symbols }),
   };
 
   return createElement("math", {

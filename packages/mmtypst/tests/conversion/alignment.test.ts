@@ -1,10 +1,10 @@
 import { describe, expect, test } from "vite-plus/test";
 
-import { typstToMathML } from "../../src/index.ts";
+import { renderMathML } from "../../src/index.ts";
 
 describe("alignment conversion", () => {
   test("converts linebreaks and alignment markers into aligned mtable in inline mode by default", () => {
-    const aligned = typstToMathML(`
+    const aligned = renderMathML(`
       f(x) &= x + 1 \\
            &= 2
     `);
@@ -12,7 +12,7 @@ describe("alignment conversion", () => {
   });
 
   test("aligned tables permit rows with different column counts", () => {
-    const output = typstToMathML("a &= b \\ c");
+    const output = renderMathML("a &= b \\ c");
     expect(output).not.toContain("<merror>");
     expect(output).toContain('style="text-align: right"');
     expect(output).toContain('style="text-align: left"');

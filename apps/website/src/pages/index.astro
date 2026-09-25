@@ -12,10 +12,10 @@ import { Playground } from "../components/Playground";
 import styles from "../Home.module.css";
 
 const demoCode = `
-import { typstToMathML } from "mmtypst";
+import { renderMathML } from "mmtypst";
 
 document.querySelector(".equation").innerHTML =
-  typstToMathML("x^2 + y^2 = z^2");
+  renderMathML("x^2 + y^2 = z^2");
 `.trim();
 ---
 

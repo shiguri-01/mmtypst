@@ -1,7 +1,7 @@
 import { generateMathML, generateMathMLBody } from "./generator.ts";
 import { tokenize } from "./lexer.ts";
 import { parse } from "./parser.ts";
-import type { ASTNode, TypstToMathMLBodyOptions, TypstToMathMLOptions } from "./types.ts";
+import type { ASTNode, RenderMathMLBodyOptions, RenderMathMLOptions } from "./types.ts";
 
 export * from "./types.ts";
 export { tokenize } from "./lexer.ts";
@@ -37,18 +37,18 @@ export function extractTypstMath(input: string): { body: string; display: "inlin
  * @param options Conversion options.
  * @returns MathML string.
  */
-export function typstToMathML(input: string, options: TypstToMathMLOptions = {}): string {
+export function renderMathML(input: string, options: RenderMathMLOptions = {}): string {
   return convert(input, options, (ast) => generateMathML(ast, options));
 }
 
 /** Converts Typst math syntax to content for a caller-provided `<math>` element. */
-export function typstToMathMLBody(input: string, options: TypstToMathMLBodyOptions = {}): string {
+export function renderMathMLBody(input: string, options: RenderMathMLBodyOptions = {}): string {
   return convert(input, options, (ast) => generateMathMLBody(ast, options));
 }
 
 function convert(
   input: string,
-  options: TypstToMathMLBodyOptions,
+  options: RenderMathMLBodyOptions,
   generate: (ast: ASTNode) => string,
 ): string {
   try {

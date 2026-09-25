@@ -1,5 +1,5 @@
-import { typstToMathMLBody } from "mmtypst";
-import type { TypstToMathMLBodyOptions } from "mmtypst";
+import { renderMathMLBody } from "mmtypst";
+import type { RenderMathMLBodyOptions } from "mmtypst";
 import { createMemo, splitProps } from "solid-js";
 import type { JSX } from "solid-js";
 
@@ -9,7 +9,7 @@ export interface MathProps
       JSX.IntrinsicElements["math"],
       "children" | "innerHTML" | "innerText" | "textContent" | "display"
     >,
-    TypstToMathMLBodyOptions {
+    RenderMathMLBodyOptions {
   /** Typst math expression without its surrounding `$` delimiters. */
   source: string;
 }
@@ -18,7 +18,7 @@ export interface MathProps
 export function Math(props: MathProps): JSX.Element {
   const [options, mathProps] = splitProps(props, ["source", "display", "throwOnError", "symbols"]);
   const body = createMemo(() =>
-    typstToMathMLBody(options.source, {
+    renderMathMLBody(options.source, {
       display: options.display,
       throwOnError: options.throwOnError,
       symbols: options.symbols,
