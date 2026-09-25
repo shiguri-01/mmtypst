@@ -46,7 +46,10 @@ jobs:
 
       - name: Stage npm package
         working-directory: ${{ steps.release.outputs.directory }}
-        run: vp pm stage publish --access public --provenance --tag latest -- --no-git-checks
+        run: |
+          tag=latest
+          if [[ "$GITHUB_REF_NAME" == *-* ]]; then tag=next; fi
+          vp pm stage publish --access public --provenance --tag "$tag" -- --no-git-checks
 
       - name: Summarize approval step
         run: |
