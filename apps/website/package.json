@@ -3,9 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vp dev",
-    "build": "vp build",
-    "preview": "vp preview",
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
     "deploy": "wrangler deploy"
   },
   "dependencies": {
@@ -15,10 +15,11 @@
     "solid-js": "catalog:"
   },
   "devDependencies": {
+    "@astrojs/solid-js": "catalog:",
     "@types/node": "catalog:",
+    "astro": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
-    "vite-plugin-solid": "catalog:",
     "vite-plus": "catalog:",
     "wrangler": "catalog:"
   }

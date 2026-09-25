@@ -1,0 +1,41 @@
+---
+import Link from "./Link.astro";
+import styles from "./Footnote.module.css";
+---
+
+<section class={styles.notes} role="doc-endnotes">
+  <h2 class={styles.heading}>Notes</h2>
+  <ol class={styles.list}>
+    <li
+      class={styles.note}
+      id="footnote-wasm"
+      value="1"
+      tabindex="-1"
+      style="anchor-name: --footnote-wasm; --reference-anchor-name: --footnote-ref-wasm"
+    >
+      The official <Link href="https://typst.app/">typst.app</Link> uses WASM on the client side,
+      and community libraries like <Link href="https://github.com/myriad-dreamin/typst.ts"
+        >Myriad-Dreamin/typst.ts</Link
+      > are also available. <a
+        class={styles.backlink}
+        href="#footnote-ref-wasm"
+        role="doc-backlink"
+        aria-label="Back to reference 1"
+      ></a>
+    </li>
+    <li
+      class={styles.note}
+      id="footnote-export-html"
+      value="2"
+      tabindex="-1"
+      style="anchor-name: --footnote-export-html; --reference-anchor-name: --footnote-ref-export-html; --previous-note-anchor-name: --footnote-wasm"
+    >
+      HTML export is currently an experimental feature. <a
+        class={styles.backlink}
+        href="#footnote-ref-export-html"
+        role="doc-backlink"
+        aria-label="Back to reference 2"
+      ></a>
+    </li>
+  </ol>
+</section>

@@ -1,0 +1,104 @@
+---
+import "@fontsource-variable/geist/wght.css";
+import "@fontsource-variable/geist-mono/wght.css";
+import "../base.css";
+
+import Code from "../components/Code.astro";
+import FootnoteRef from "../components/FootnoteRef.astro";
+import Footnotes from "../components/Footnotes.astro";
+import Header from "../components/Header.astro";
+import Link from "../components/Link.astro";
+import { Playground } from "../components/Playground";
+import styles from "../Home.module.css";
+
+const demoCode = `
+import { typstToMathML } from "mmtypst";
+
+document.querySelector(".equation").innerHTML =
+  typstToMathML("x^2 + y^2 = z^2");
+`.trim();
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A JavaScript library for displaying Typst math on the web. Convert standalone expressions to native MathML, in the browser or on the server."
+    />
+    <meta name="theme-color" content="#fdfdfd" />
+    <title>mmtypst — Typst math for the web</title>
+  </head>
+  <body>
+    <div class={styles.page}>
+      <Header />
+
+      <main>
+        <p class={styles.lead}>A JavaScript library for rendering math on the web using Typst syntax.</p>
+
+        <div class={styles.playground}>
+          <Playground client:load />
+        </div>
+
+        <div class={styles.details}>
+          <section class={styles.section}>
+            <div class={styles.sectionHeader}>
+              <h2 class={styles.heading}>How it renders</h2>
+            </div>
+            <div class={styles.body}>
+              <p>
+                mmtypst converts <Link href="https://typst.app">Typst</Link> math expressions to <Link
+                  href="https://developer.mozilla.org/en-US/docs/Web/MathML">MathML</Link
+                >
+                {" "}for the browser to render. It works in the browser, at build time, or on the server.
+                Pre-rendered expressions need no client-side JavaScript. Rendering and appearance are
+                handled by the browser and the available math fonts.
+              </p>
+            </div>
+          </section>
+          <section class={styles.section}>
+            <div class={styles.sectionHeader}>
+              <h2 class={styles.heading}>Why Typst</h2>
+            </div>
+            <div class={styles.body}>
+              <p>Typst math syntax is simply delightful, and I wanted that experience on the web.</p>
+              <p>And I just like Typst 🥰</p>
+            </div>
+          </section>
+          <section class={styles.section}>
+            <div class={styles.sectionHeader}>
+              <h2 class={styles.heading}>Why not Typst</h2>
+            </div>
+            <div class={styles.body}>
+              <p>
+                Typst can already run in the browser through WebAssembly (WASM)<FootnoteRef
+                  id="wasm"
+                  number={1}
+                /> and export HTML with MathML<FootnoteRef id="export-html" number={2} />.
+              </p>
+              <p>
+                But sometimes you don't need a full document compiler. You just want to render an
+                equation. mmtypst handles that smaller job with a smaller footprint.
+              </p>
+            </div>
+          </section>
+
+          <section class={styles.section}>
+            <div class={styles.sectionHeader}>
+              <h2 class={styles.heading}>Usage</h2>
+              <Link href="https://github.com/shiguri-01/mmtypst">View on GitHub</Link>
+            </div>
+            <div class={styles.body}>
+              <Code>npm install mmtypst</Code>
+              <Code>{demoCode}</Code>
+            </div>
+          </section>
+        </div>
+
+        <Footnotes />
+      </main>
+    </div>
+  </body>
+</html>
