@@ -2,10 +2,10 @@ name: Publish
 
 on:
   push:
-    tags: ["mmtypst-v*", "react-v*", "solid-v*"]
+    tags: ["mmtypst@*", "@mmtypst/react@*", "@mmtypst/solid@*"]
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
 
 concurrency:
@@ -28,9 +28,9 @@ jobs:
         shell: bash
         run: |
           case "$GITHUB_REF_NAME" in
-            mmtypst-v*) directory=packages/mmtypst; package=mmtypst; version="${GITHUB_REF_NAME#mmtypst-v}" ;;
-            react-v*) directory=packages/react; package=@mmtypst/react; version="${GITHUB_REF_NAME#react-v}" ;;
-            solid-v*) directory=packages/solid; package=@mmtypst/solid; version="${GITHUB_REF_NAME#solid-v}" ;;
+            mmtypst@*) directory=packages/mmtypst; package=mmtypst; version="${GITHUB_REF_NAME#mmtypst@}" ;;
+            @mmtypst/react@*) directory=packages/react; package=@mmtypst/react; version="${GITHUB_REF_NAME#@mmtypst/react@}" ;;
+            @mmtypst/solid@*) directory=packages/solid; package=@mmtypst/solid; version="${GITHUB_REF_NAME#@mmtypst/solid@}" ;;
             *) echo "Unsupported release tag: $GITHUB_REF_NAME" >&2; exit 1 ;;
           esac
           PACKAGE_DIR="$directory" PACKAGE_NAME="$package" RELEASE_VERSION="$version" node --input-type=module -e '
@@ -41,16 +41,24 @@ jobs:
             assert.equal(version, process.env.RELEASE_VERSION, "Tag must match the package version");
           '
           echo "directory=$directory" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
 
       - run: vp run ready
 
       - name: Stage npm package
         working-directory: ${{ steps.release.outputs.directory }}
+        env:
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
         run: |
           tag=latest
-          if [[ "$GITHUB_REF_NAME" == *-* ]]; then tag=next; fi
+          if [[ "$RELEASE_VERSION" == *-* ]]; then tag=next; fi
           vp pm stage publish --access public --provenance --tag "$tag" -- --no-git-checks
 
-      - name: Summarize approval step
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
         run: |
-          echo "Review and approve the staged npm package before creating a GitHub Release for $GITHUB_REF_NAME." >> "$GITHUB_STEP_SUMMARY"
+          args=()
+          if [[ "$RELEASE_VERSION" == *-* ]]; then args+=(--prerelease); fi
+          gh release create "$GITHUB_REF_NAME" --verify-tag --generate-notes "${args[@]}"
