@@ -11,11 +11,15 @@ catalog:
   "@fontsource-variable/geist": ^5.3.0
   "@fontsource-variable/geist-mono": ^5.3.0
   "@react-spectrum/s2": ^1.7.1
+  "@solidjs/testing-library": ^0.8.10
   "@types/node": ^24
+  jsdom: ^25.0.1
   astro: ^7.3.4
   solid-js: ^1.9.15
   typescript: ^7.0.2
+  unplugin-solid: ^2.0.0
   vite: npm:@voidzero-dev/vite-plus-core@1.0.0-rc.0
+  vite-plugin-solid: ^2.11.14
   vite-plus: 1.0.0-rc.0
   wrangler: ^4.133.0
 overrides:

@@ -1,0 +1,67 @@
+{
+  "name": "@mmtypst/solid",
+  "version": "0.1.0",
+  "description": "Solid component for rendering Typst math as MathML.",
+  "keywords": [
+    "math",
+    "mathml",
+    "solid",
+    "typst"
+  ],
+  "homepage": "https://github.com/shiguri-01/mmtypst#readme",
+  "bugs": {
+    "url": "https://github.com/shiguri-01/mmtypst/issues"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "shiguri",
+    "url": "https://github.com/shiguri-01"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shiguri-01/mmtypst.git",
+    "directory": "packages/solid"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "types": "./dist/browser/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/browser/index.d.ts",
+      "worker": "./dist/server/index.js",
+      "deno": "./dist/server/index.js",
+      "node": "./dist/server/index.js",
+      "default": "./dist/browser/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vp pack",
+    "test": "vp test --run && vp test --run --config vite.server.config.ts",
+    "check": "vp check",
+    "prepublishOnly": "vp run build",
+    "bump": "bumpp"
+  },
+  "dependencies": {
+    "mmtypst": "workspace:~"
+  },
+  "devDependencies": {
+    "@solidjs/testing-library": "catalog:",
+    "bumpp": "^11.1.0",
+    "jsdom": "catalog:",
+    "solid-js": "catalog:",
+    "typescript": "^7.0.2",
+    "unplugin-solid": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-solid": "catalog:",
+    "vite-plus": "catalog:"
+  },
+  "peerDependencies": {
+    "solid-js": "^1.9.0"
+  }
+}

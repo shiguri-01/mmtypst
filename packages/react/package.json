@@ -1,0 +1,60 @@
+{
+  "name": "@mmtypst/react",
+  "version": "0.1.0",
+  "description": "React component for rendering Typst math as MathML.",
+  "keywords": [
+    "math",
+    "mathml",
+    "react",
+    "typst"
+  ],
+  "homepage": "https://github.com/shiguri-01/mmtypst#readme",
+  "bugs": {
+    "url": "https://github.com/shiguri-01/mmtypst/issues"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "shiguri",
+    "url": "https://github.com/shiguri-01"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shiguri-01/mmtypst.git",
+    "directory": "packages/react"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vp pack",
+    "test": "vp test --run",
+    "check": "vp check",
+    "prepublishOnly": "vp run build",
+    "bump": "bumpp"
+  },
+  "dependencies": {
+    "mmtypst": "workspace:~"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "bumpp": "^11.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "typescript": "^7.0.2",
+    "vite": "catalog:",
+    "vite-plus": "catalog:"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  }
+}

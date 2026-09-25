@@ -2,10 +2,10 @@ name: Publish
 
 on:
   push:
-    tags: ["v*"]
+    tags: ["mmtypst-v*", "react-v*", "solid-v*"]
 
 permissions:
-  contents: write
+  contents: read
   id-token: write
 
 concurrency:
@@ -22,19 +22,35 @@ jobs:
           cache: true
           run-install: false
       - run: vp install --frozen-lockfile
-      - name: Verify release version
-        run: node --input-type=module -e 'import { readFileSync } from "node:fs"; import assert from "node:assert/strict"; const { version } = JSON.parse(readFileSync("packages/mmtypst/package.json", "utf8")); assert.equal(process.env.GITHUB_REF_NAME, `v${version}`, "Tag must match the package version");'
+
+      - name: Select and verify package
+        id: release
+        shell: bash
+        run: |
+          case "$GITHUB_REF_NAME" in
+            mmtypst-v*) directory=packages/mmtypst; package=mmtypst; version="${GITHUB_REF_NAME#mmtypst-v}" ;;
+            react-v*) directory=packages/react; package=@mmtypst/react; version="${GITHUB_REF_NAME#react-v}" ;;
+            solid-v*) directory=packages/solid; package=@mmtypst/solid; version="${GITHUB_REF_NAME#solid-v}" ;;
+            *) echo "Unsupported release tag: $GITHUB_REF_NAME" >&2; exit 1 ;;
+          esac
+          PACKAGE_DIR="$directory" PACKAGE_NAME="$package" RELEASE_VERSION="$version" node --input-type=module -e '
+            import { readFileSync } from "node:fs";
+            import assert from "node:assert/strict";
+            const { name, version } = JSON.parse(readFileSync(`${process.env.PACKAGE_DIR}/package.json`, "utf8"));
+            assert.equal(name, process.env.PACKAGE_NAME, "Tag must select the expected package");
+            assert.equal(version, process.env.RELEASE_VERSION, "Tag must match the package version");
+          '
+          echo "directory=$directory" >> "$GITHUB_OUTPUT"
+
       - run: vp run ready
+
       - name: Stage npm package
-        working-directory: packages/mmtypst
+        working-directory: ${{ steps.release.outputs.directory }}
         run: |
           tag=latest
           if [[ "$GITHUB_REF_NAME" == *-* ]]; then tag=next; fi
           vp pm stage publish --access public --provenance --tag "$tag" -- --no-git-checks
-      - name: Create GitHub Release
-        env:
-          GH_TOKEN: ${{ github.token }}
+
+      - name: Summarize approval step
         run: |
-          args=()
-          if [[ "$GITHUB_REF_NAME" == *-* ]]; then args+=(--prerelease); fi
-          gh release create "$GITHUB_REF_NAME" --verify-tag --generate-notes "${args[@]}"
+          echo "Review and approve the staged npm package before creating a GitHub Release for $GITHUB_REF_NAME." >> "$GITHUB_STEP_SUMMARY"
