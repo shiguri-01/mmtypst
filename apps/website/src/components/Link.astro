@@ -1,0 +1,19 @@
+---
+import styles from "./Link.module.css";
+
+interface Props {
+  href: string;
+  target?: string;
+}
+
+const { href, target } = Astro.props;
+const isExternal = href.startsWith("https://");
+const className = `${styles.link} ${isExternal ? styles.external : ""}`;
+---
+
+<a
+  class={className}
+  href={href}
+  target={target}
+  rel={target === "_blank" ? "noopener noreferrer" : undefined}
+><slot /></a>
