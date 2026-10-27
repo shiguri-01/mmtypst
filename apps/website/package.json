@@ -4,9 +4,9 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro build && vp build",
     "preview": "astro preview",
-    "deploy": "wrangler deploy"
+    "deploy": "vp run build && cf deploy --prebuilt"
   },
   "dependencies": {
     "@fontsource-variable/geist": "catalog:",
@@ -16,11 +16,12 @@
   },
   "devDependencies": {
     "@astrojs/solid-js": "catalog:",
+    "@cloudflare/vite-plugin": "catalog:",
     "@types/node": "catalog:",
     "astro": "catalog:",
+    "cf": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
-    "vite-plus": "catalog:",
-    "wrangler": "catalog:"
+    "vite-plus": "catalog:"
   }
 }
