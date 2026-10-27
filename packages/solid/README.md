@@ -35,3 +35,11 @@ default, errors render as MathML `<merror>` elements.
 
 The component accepts ordinary `<math>` attributes and a `ref` to the MathML
 element. Its content updates reactively when `source` or options change.
+
+## Acknowledgments
+
+mmtypst would not exist without [Typst](https://typst.app/).
+This project builds on its wonderful math syntax and
+uses the Typst compiler to verify compatibility in tests.
+
+Many thanks to the Typst authors and contributors.

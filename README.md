@@ -86,3 +86,15 @@ not require the compiler. After changing the corpus or the version in
 mise install
 mise exec -- vp run mmtypst#update-typst-conformance
 ```
+
+## Acknowledgments
+
+mmtypst would not exist without [Typst](https://typst.app/).
+This project builds on its wonderful math syntax and
+uses the Typst compiler to verify compatibility in tests.
+
+Many thanks to the Typst authors and contributors.
+
+## License
+
+[MIT](LICENSE).

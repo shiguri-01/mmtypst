@@ -115,6 +115,14 @@ for more about math fonts and platform support.
 - [Typst math reference](https://typst.app/docs/reference/math/)
 - [MathML Core](https://www.w3.org/TR/mathml-core/)
 
+## Acknowledgments
+
+mmtypst would not exist without [Typst](https://typst.app/).
+This project builds on its wonderful math syntax and
+uses the Typst compiler to verify compatibility in tests.
+
+Many thanks to the Typst authors and contributors.
+
 ## License
 
 MIT
