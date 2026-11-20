@@ -52,7 +52,7 @@
   },
   "devDependencies": {
     "@solidjs/testing-library": "catalog:",
-    "bumpp": "^11.1.0",
+    "bumpp": "^12.3.0",
     "jsdom": "catalog:",
     "solid-js": "catalog:",
     "typescript": "^7.0.2",
