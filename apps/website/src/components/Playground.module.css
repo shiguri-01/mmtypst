@@ -1,3 +1,9 @@
+@font-face {
+  font-family: "STIX Two Math";
+  src: url("/fonts/stix-two-math-2.13b171/STIXTwoMath-Regular.woff2") format("woff2");
+  font-display: swap;
+}
+
 .playground {
   container-type: inline-size;
   display: grid;
